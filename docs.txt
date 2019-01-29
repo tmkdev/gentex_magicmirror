@@ -1,0 +1,5 @@
+Gentex 657
+
+Driving reverse lamp pin (9) with a duty cycle of 10s on, 1s off keeps it from timing out. It works as low as 3.3V, driven from a raspberry pi GPIO. 
+
+
