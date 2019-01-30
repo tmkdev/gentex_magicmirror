@@ -55,7 +55,7 @@ class carmirror(object):
         self.huge_font = pygame.font.Font("segoeuil.ttf", 240)
         self.ui_font = pygame.font.Font("segoeuil.ttf", 90)
         self.sub_font = pygame.font.Font("segoeuil.ttf", 48)
-        self.tiny_font = pygame.font.Font("segoeuil.ttf", 32)
+        self.tiny_font = pygame.font.Font("segoeuil.ttf", 36)
         # Render the screen
         pygame.mouse.set_visible(False)
         pygame.display.update()
@@ -91,13 +91,13 @@ class carmirror(object):
 
                 if packet.mode >= 2:
                     self.drawtext(self.huge_font, int(packet.hspeed), (320,110))
-                    self.drawtext(self.tiny_font, "Speed(mph)", (350,120), (128,128,128))
+                    self.drawtext(self.tiny_font, "Speed(mph)", (320,120), (128,128,128))
                     self.drawtext(self.tiny_font, packet.time, (20,40))
                     self.drawtext(self.tiny_font, "Time", (20,10), (128,128,128))
                     self.drawtext(self.ui_font, packet.alt, (10,210))
-                    self.drawtext(self.tiny_font, "Altitude", (20,200), (128,128,128))
+                    self.drawtext(self.tiny_font, "Altitude", (10,200), (128,128,128))
                     self.drawtext(self.ui_font, packet.track, (10,310))
-                    self.drawtext(self.tiny_font, "Heading", (20,300), (128,128,128))
+                    self.drawtext(self.tiny_font, "Heading", (10,300), (128,128,128))
                     self.drawtext(self.tiny_font, packet.lat, (20,420))
                     self.drawtext(self.tiny_font, packet.lon, (340,420))
 
