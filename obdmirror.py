@@ -8,12 +8,8 @@ import logging
 import obd
 
 from gpiozero import LED
-from signal import pause
 
 #obd.logger.setLevel(obd.logging.DEBUG)
-
-red = LED(17)
-red.blink(on_time=10, off_time=1, background=True)
 
 connection = None
 
@@ -54,9 +50,12 @@ commandlist = {
 
 currentcommandlist = None
 
+def setscreen(rev_gpio):
+    screen_reverse_pin = LED(rev_gpio)
+    screen_reverse_pin.blink(on_time=10, off_time=1, background=True)
+
 def setcommandlist(listname):
     global connection, currentcommandlist
-    
     if currentcommandlist != listname:
         connection.stop()
         connection.unwatch_all()
@@ -70,8 +69,12 @@ def setcommandlist(listname):
 
 
 def configobd(port='/dev/pts/3'):
-    global connection
-    connection = obd.Async('/dev/pts/3') 
+    try:
+        global connection
+        connection = obd.Async(port)
+    except:
+        logging.critical('No OBD found on {0}'.format(port))
+
 
 def configgps():
     global gpsconnected
@@ -121,7 +124,7 @@ class Carmirror(object):
             raise Exception('No suitable video driver found!')
 
         size = (pygame.display.Info().current_w, pygame.display.Info().current_h)
-        print("Framebuffer size: %d x %d" % (size[0], size[1]))
+        logging.warning("Framebuffer size: %d x %d" % (size[0], size[1]))
         self.screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
         # Clear the screen to start
         self.screen.fill((0, 0, 0))
@@ -135,6 +138,9 @@ class Carmirror(object):
         pygame.mouse.set_visible(False)
         pygame.display.update()
 
+    def __del__(self):
+        "Destructor to make sure pygame shuts down, etc."
+
     def drawfluent(self, pritext, titletext, size=_FLUENT_MED, position=(0,0)):
         if size == self._FLUENT_SMALL:
             self.drawtext(self.tiny_font, titletext, position, self._GREY)
@@ -145,9 +151,6 @@ class Carmirror(object):
         if size == self._FLUENT_LARGE:
             self.drawtext(self.sub_font, titletext, position, self._GREY)
             self.drawtext(self.huge_font, pritext, position, self._WHITE)
-
-    def __del__(self):
-        "Destructor to make sure pygame shuts down, etc."
 
     def drawtext(self, font, text, position, color=(255,255,255)):
         text = font.render(str(text), True, color)
@@ -294,8 +297,8 @@ class Carmirror(object):
                     r = int(packet.hspeed)
                     self.drawfluent(r, "speed", self._FLUENT_LARGE, (260,160) )
 
-                    r = packet.time
-                    self.drawfluent(r, "time", self._FLUENT_SMALL, (10,10) )
+                    r = packet.get_time(local_time=True)
+                    self.drawfluent(r.strftime('%a, %b %d %Y %-H:%M:%S'), "time", self._FLUENT_SMALL, (10,10) )
 
                     r = int(packet.alt)
                     self.drawfluent(r, "altitude", self._FLUENT_SMALL, (10,90) )
@@ -325,19 +328,29 @@ class Carmirror(object):
 
 # Create an instance of the PyScope class
 if __name__ == '__main__':
+    reverse_pin = int(os.getenv('REV_GPIO', 17))
+    obd_port = os.getenv('OBD_PORT', '/dev/ttyACM0')
+
+    setscreen(reverse_pin)
+
     mirror = Carmirror()
     mirror.infoscreen("starting OBD", "Please wait")
-    configobd()
+    configobd(obd_port)
+
     mirror.infoscreen("starting GPS", "Please wait")
     configgps()
-    mirror.codes()
+    if connection:
+        mirror.codes()
+
     while True:
         for x in range(300):
             mirror.gpsscreen()
-        for x in range(300):
-            mirror.obd_main()
-        for x in range(300):
-            mirror.obd_airfuel()
+        if connection:
+            logging.warning(connection.status())
+            for x in range(300):
+                mirror.obd_main()
+            for x in range(300):
+                mirror.obd_airfuel()
 
 
 
