@@ -7,3 +7,7 @@ https://github.com/winjs/winstrap/tree/5a3c1341190e7585fd550e01cfded50ae4e8a4c7/
 
 pygame code based on:
 https://learn.adafruit.com/pi-video-output-using-pygame/pointing-pygame-to-the-framebuffer 
+
+
+Notes on the Gentex 657 mirror.
+Driving reverse lamp pin (9) with a duty cycle of 10s on, 1s off keeps it from timing out. It works as low as 3.3V, driven from a raspberry pi GPIO. 
