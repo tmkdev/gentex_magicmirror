@@ -221,6 +221,46 @@ class Carmirror(object):
 
             pygame.display.update()
 
+    def obd_airfuel(self):
+            setcommandlist('airfuel')
+
+            try:
+                self.clearscreen()
+
+                r = self.formatresponse(connection.query(obd.commands.SHORT_FUEL_TRIM_1))
+                self.drawfluent(r, "stft1", self._FLUENT_SMALL, (300,10) )
+
+                r = self.formatresponse(connection.query(obd.commands.LONG_FUEL_TRIM_1))
+                self.drawfluent(r, "ltft1", self._FLUENT_SMALL, (420,10) )
+
+                r = self.formatresponse(connection.query(obd.commands.SHORT_FUEL_TRIM_2))
+                self.drawfluent(r, "stft2", self._FLUENT_SMALL, (300,90) )
+
+                r = self.formatresponse(connection.query(obd.commands.LONG_FUEL_TRIM_2))
+                self.drawfluent(r, "ltft2", self._FLUENT_SMALL, (420,90) )
+
+                 r = self.formatresponse(connection.query(obd.commands.O2_B1S1))
+                self.drawfluent(r, "stft1", self._FLUENT_SMALL, (300,170) )
+
+                r = self.formatresponse(connection.query(obd.commands.O2_B1S2))
+                self.drawfluent(r, "ltft1", self._FLUENT_SMALL, (420,170) )
+
+                r = self.formatresponse(connection.query(obd.commands.O2_B2S1))
+                self.drawfluent(r, "stft2", self._FLUENT_SMALL, (300,250) )
+
+                r = self.formatresponse(connection.query(obd.commands.O2_B2S1))
+                self.drawfluent(r, "ltft2", self._FLUENT_SMALL, (420,250) )
+
+
+            except KeyboardInterrupt:
+                pass
+
+            except:
+                self.drawtext(self.ui_font, "OBD Error", (10,10))
+                logging.exception('OBD Failure.. ')
+
+            pygame.display.update()
+
     def gpsscreen(self):
             try:
                 self.clearscreen()
@@ -272,6 +312,8 @@ if __name__ == '__main__':
             mirror.gpsscreen()
         for x in range(300):
             mirror.obd_main()
+        for x in range(300):
+            mirror.obd_airfuel()
 
 
 
