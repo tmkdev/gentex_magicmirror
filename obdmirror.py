@@ -127,10 +127,10 @@ class Carmirror(object):
         self.screen.fill((0, 0, 0))
         # Initialise font support
         pygame.font.init()
-        self.huge_font = pygame.font.Font("assets/segoeuil.ttf", 240)
-        self.ui_font = pygame.font.Font("assets/segoeuil.ttf", 90)
-        self.sub_font = pygame.font.Font("assets/segoeuil.ttf", 48)
-        self.tiny_font = pygame.font.Font("assets/segoeuil.ttf", 36)
+        self.huge_font = pygame.font.Font("assets/selawkl.ttf", 240)
+        self.ui_font = pygame.font.Font("assets/selawkl.ttf", 90)
+        self.sub_font = pygame.font.Font("assets/selawkl.ttf", 48)
+        self.tiny_font = pygame.font.Font("assets/selawkl.ttf", 36)
         # Render the screen
         pygame.mouse.set_visible(False)
         pygame.display.update()
