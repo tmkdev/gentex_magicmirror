@@ -45,7 +45,10 @@ commandlist = {
         'O2_B2S2',
         'COMMANDED_EGR',
         'EGR_ERROR',
-        'MAF'
+        'MAF',
+        'INTAKE_PRESSURE',
+        'RPM',
+        'SPEED',
     ]
 }
 
@@ -197,6 +200,9 @@ class Carmirror(object):
                 r = self.formatresponse(connection.query(obd.commands.THROTTLE_POS))
                 self.drawfluent(r, "tps%", self._FLUENT_SMALL, (10,350) )
 
+                r = self.formatresponse(connection.query(obd.commands.ENGINE_LOAD))
+                self.drawfluent(r, "load", self._FLUENT_SMALL, (120,350) )
+
                 r = self.formatresponse(connection.query(obd.commands.TIMING_ADVANCE))
                 self.drawfluent(r, "advance", self._FLUENT_SMALL, (140,10) )
 
@@ -227,29 +233,47 @@ class Carmirror(object):
             try:
                 self.clearscreen()
 
-                r = self.formatresponse(connection.query(obd.commands.SHORT_FUEL_TRIM_1))
-                self.drawfluent(r, "stft1", self._FLUENT_SMALL, (300,10) )
+                r = self.formatresponse(connection.query(obd.commands.MAF), precision=0)
+                self.drawfluent(r, "maf", self._FLUENT_SMALL, (10,10) )
 
-                r = self.formatresponse(connection.query(obd.commands.LONG_FUEL_TRIM_1))
-                self.drawfluent(r, "ltft1", self._FLUENT_SMALL, (420,10) )
+                r = self.formatresponse(connection.query(obd.commands.COMMANDED_EGR))
+                self.drawfluent(r, "commanded egr", self._FLUENT_SMALL, (10,90) )
 
-                r = self.formatresponse(connection.query(obd.commands.SHORT_FUEL_TRIM_2))
-                self.drawfluent(r, "stft2", self._FLUENT_SMALL, (300,90) )
+                r = self.formatresponse(connection.query(obd.commands.EGR_ERROR))
+                self.drawfluent(r, "egr error", self._FLUENT_SMALL, (10,170) )
 
-                r = self.formatresponse(connection.query(obd.commands.LONG_FUEL_TRIM_2))
-                self.drawfluent(r, "ltft2", self._FLUENT_SMALL, (420,90) )
+                r = self.formatresponse(connection.query(obd.commands.INTAKE_PRESSURE),  precision=1)
+                self.drawfluent(r, "map", self._FLUENT_SMALL, (10,250) )
 
-                 r = self.formatresponse(connection.query(obd.commands.O2_B1S1))
-                self.drawfluent(r, "stft1", self._FLUENT_SMALL, (300,170) )
+                r = self.formatresponse(connection.query(obd.commands.SPEED))
+                self.drawfluent(r, "speed", self._FLUENT_SMALL, (10,330) )
 
-                r = self.formatresponse(connection.query(obd.commands.O2_B1S2))
-                self.drawfluent(r, "ltft1", self._FLUENT_SMALL, (420,170) )
+                r = self.formatresponse(connection.query(obd.commands.RPM))
+                self.drawfluent(r, "RPM", self._FLUENT_SMALL, (290,330) )
 
-                r = self.formatresponse(connection.query(obd.commands.O2_B2S1))
-                self.drawfluent(r, "stft2", self._FLUENT_SMALL, (300,250) )
+                r = self.formatresponse(connection.query(obd.commands.SHORT_FUEL_TRIM_1), precision=2)
+                self.drawfluent(r, "stft1", self._FLUENT_SMALL, (290,10) )
 
-                r = self.formatresponse(connection.query(obd.commands.O2_B2S1))
-                self.drawfluent(r, "ltft2", self._FLUENT_SMALL, (420,250) )
+                r = self.formatresponse(connection.query(obd.commands.LONG_FUEL_TRIM_1), precision=2)
+                self.drawfluent(r, "ltft1", self._FLUENT_SMALL, (430,10) )
+
+                r = self.formatresponse(connection.query(obd.commands.SHORT_FUEL_TRIM_2), precision=2)
+                self.drawfluent(r, "stft2", self._FLUENT_SMALL, (290,90) )
+
+                r = self.formatresponse(connection.query(obd.commands.LONG_FUEL_TRIM_2), precision=2)
+                self.drawfluent(r, "ltft2", self._FLUENT_SMALL, (430,90) )
+
+                r = self.formatresponse(connection.query(obd.commands.O2_B1S1), precision=2)
+                self.drawfluent(r, "o2 b1 s1", self._FLUENT_SMALL, (290,170) )
+
+                r = self.formatresponse(connection.query(obd.commands.O2_B1S2), precision=2)
+                self.drawfluent(r, "o2 b1 s2", self._FLUENT_SMALL, (430,170) )
+
+                r = self.formatresponse(connection.query(obd.commands.O2_B2S1), precision=2)
+                self.drawfluent(r, "o2 b2 s1", self._FLUENT_SMALL, (290,250) )
+
+                r = self.formatresponse(connection.query(obd.commands.O2_B2S1), precision=2)
+                self.drawfluent(r, "o2 b2 s2", self._FLUENT_SMALL, (430,250) )
 
 
             except KeyboardInterrupt:
