@@ -128,13 +128,13 @@ class carmirror(object):
         except:
             return 'N/A'
 
-    def infoscreen(self, title, message):
+    def infoscreen(self, title, message, x=100):
         self.clearscreen()
-        self.drawfluent(title, message, self._FLUENT_MED, (10,100) )
+        self.drawfluent(title, message, self._FLUENT_MED, (10,x) )
         pygame.display.update()
 
     def codes(self):
-        self.infoscreen("checking DTCs", "Please wait")
+        self.infoscreen("checking DTCs", "Please wait", x=10)
 
         connection.stop()
         connection.watch(obd.commands.GET_DTC)
@@ -143,7 +143,9 @@ class carmirror(object):
         r = connection.query(obd.commands.GET_DTC)
 
         if r.value:
-            self.infoscreen(len(r.value), "DTC count")
+            msg = "DTC Count {0}".format(len(r.value))
+
+            self.infoscreen(msg, "DTCs", x=10)
             time.sleep(3)
 
         connection.stop()
@@ -206,7 +208,7 @@ class carmirror(object):
                     self.drawfluent(r, "time", self._FLUENT_SMALL, (10,10) )
 
                     r = int(packet.alt)
-                    self.drawfluent(r, "time", self._FLUENT_SMALL, (10,90) )
+                    self.drawfluent(r, "altitude", self._FLUENT_SMALL, (10,90) )
 
                     r = int(packet.track)
                     self.drawfluent(r, "heading", self._FLUENT_SMALL, (10,170) )
