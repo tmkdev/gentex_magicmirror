@@ -19,25 +19,55 @@ connection = None
 
 gpsconnected = False
 
+commandlist = {
+    'dtc': ['GET_DTC'],
+    'obdmain': [
+        'ENGINE_LOAD',
+        'COOLANT_TEMP',
+        'SHORT_FUEL_TRIM_1',
+        'LONG_FUEL_TRIM_1',
+        'SHORT_FUEL_TRIM_2',
+        'LONG_FUEL_TRIM_2',
+        'RPM',
+        'SPEED',
+        'TIMING_ADVANCE',
+        'INTAKE_TEMP'
+        'THROTTLE_POS'
+    ],
+    'airfuel': [
+        'SHORT_FUEL_TRIM_1',
+        'LONG_FUEL_TRIM_1',
+        'SHORT_FUEL_TRIM_2',
+        'LONG_FUEL_TRIM_2','
+        'O2_B1S1',
+        'O2_B1S2',
+        'O2_B2S1',
+        'O2_B2S2',
+        'COMMANDED_EGR',
+        'EGR_ERROR',
+        'MAF'
+    ]
+
+currentcommandlist = None
+
+def setcommandlist(listname):
+    global connection, currentcommandlist
+    
+    if currentcommandlist != listname:
+        connection.stop()
+        connection.unwatch_all()
+
+        for command in commandlist[listname]:
+            connection.watch(obd.commands[command])
+
+        currentcommandlist = listname
+
+        connection.start()
+
+
 def configobd(port='/dev/pts/3'):
     global connection
-
-    connection = obd.Async('/dev/pts/3')
-
-    for command in [obd.commands.COOLANT_TEMP,
-                obd.commands.RPM,
-                obd.commands.SPEED,
-                obd.commands.INTAKE_TEMP,
-                obd.commands.THROTTLE_POS,
-                obd.commands.TIMING_ADVANCE,
-                obd.commands.SHORT_FUEL_TRIM_1,
-                obd.commands.LONG_FUEL_TRIM_1,
-                obd.commands.SHORT_FUEL_TRIM_2,
-                obd.commands.LONG_FUEL_TRIM_2,
-                ]:
-        connection.watch(command)
-
-    connection.start()
+    connection = obd.Async('/dev/pts/3') 
 
 def configgps():
     global gpsconnected
@@ -49,7 +79,7 @@ def configgps():
             logging.critical('No GPS connection present. TIME NOT SET.')
             time.sleep(0.5)
 
-class carmirror(object):
+class Carmirror(object):
     screen = None
     _WHITE = (255,255,255)
     _GREY = (128,128,128)
@@ -93,10 +123,10 @@ class carmirror(object):
         self.screen.fill((0, 0, 0))
         # Initialise font support
         pygame.font.init()
-        self.huge_font = pygame.font.Font("segoeuil.ttf", 240)
-        self.ui_font = pygame.font.Font("segoeuil.ttf", 90)
-        self.sub_font = pygame.font.Font("segoeuil.ttf", 48)
-        self.tiny_font = pygame.font.Font("segoeuil.ttf", 36)
+        self.huge_font = pygame.font.Font("assets/segoeuil.ttf", 240)
+        self.ui_font = pygame.font.Font("assets/segoeuil.ttf", 90)
+        self.sub_font = pygame.font.Font("assets/segoeuil.ttf", 48)
+        self.tiny_font = pygame.font.Font("assets/segoeuil.ttf", 36)
         # Render the screen
         pygame.mouse.set_visible(False)
         pygame.display.update()
@@ -134,25 +164,20 @@ class carmirror(object):
         pygame.display.update()
 
     def codes(self):
-        self.infoscreen("checking DTCs", "Please wait", x=10)
+        self.infoscreen("checking DTCs", "please wait")
 
-        connection.stop()
-        connection.watch(obd.commands.GET_DTC)
-        connection.start()
+        setcommandlist('dtc')
         time.sleep(2)
         r = connection.query(obd.commands.GET_DTC)
 
         if r.value:
             msg = "DTC Count {0}".format(len(r.value))
-
-            self.infoscreen(msg, "DTCs", x=10)
+            self.infoscreen(msg, "DTCs")
             time.sleep(3)
 
-        connection.stop()
-        connection.unwatch(obd.commands.GET_DTC)
-        connection.start()
-
     def obd_main(self):
+            setcommandlist('obdmain')
+
             try:
                 self.clearscreen()
 
