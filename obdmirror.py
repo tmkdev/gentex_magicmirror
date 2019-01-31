@@ -31,14 +31,14 @@ commandlist = {
         'RPM',
         'SPEED',
         'TIMING_ADVANCE',
-        'INTAKE_TEMP'
+        'INTAKE_TEMP',
         'THROTTLE_POS'
     ],
     'airfuel': [
         'SHORT_FUEL_TRIM_1',
         'LONG_FUEL_TRIM_1',
         'SHORT_FUEL_TRIM_2',
-        'LONG_FUEL_TRIM_2','
+        'LONG_FUEL_TRIM_2',
         'O2_B1S1',
         'O2_B1S2',
         'O2_B2S1',
@@ -47,6 +47,7 @@ commandlist = {
         'EGR_ERROR',
         'MAF'
     ]
+}
 
 currentcommandlist = None
 
@@ -260,17 +261,17 @@ class Carmirror(object):
 
 # Create an instance of the PyScope class
 if __name__ == '__main__':
-    scope = carmirror()
-    scope.infoscreen("starting OBD", "Please wait")
+    mirror = Carmirror()
+    mirror.infoscreen("starting OBD", "Please wait")
     configobd()
-    scope.infoscreen("starting GPS", "Please wait")
+    mirror.infoscreen("starting GPS", "Please wait")
     configgps()
-    scope.codes()
+    mirror.codes()
     while True:
         for x in range(300):
-            scope.gpsscreen()
+            mirror.gpsscreen()
         for x in range(300):
-            scope.obd_main()
+            mirror.obd_main()
 
 
 
