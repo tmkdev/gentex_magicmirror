@@ -14,3 +14,5 @@ Driving reverse lamp pin (9) with a duty cycle of 10s on, 1s off keeps it from t
 Example of the thing runing: https://photos.app.goo.gl/M7oZyTBy9QhEEuzM9 
 
 ![Alt text](assets/screenshots/gps_screen.jpg?raw=true "GPS Screenshot")
+![Alt text](assets/screenshots/obd_screen.jpg?raw=true "OBD Screenshot")
+![Alt text](assets/screenshots/airfuel_screen.jpg?raw=true "AirFuel Screenshot")
