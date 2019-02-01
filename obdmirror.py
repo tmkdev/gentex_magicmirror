@@ -7,6 +7,8 @@ import gpsd
 import logging
 import obd
 
+from pathlib import Path
+
 from gpiozero import LED
 
 #obd.logger.setLevel(obd.logging.DEBUG)
@@ -230,6 +232,9 @@ class Carmirror(object):
 
             pygame.display.update()
 
+            #pygame.image.save(self.screen, "obd_screen.jpg")
+
+
     def obd_airfuel(self):
             setcommandlist('airfuel')
 
@@ -288,6 +293,9 @@ class Carmirror(object):
 
             pygame.display.update()
 
+            #pygame.image.save(self.screen, "airfuel_screen.jpg")
+
+
     def gpsscreen(self):
             try:
                 self.clearscreen()
@@ -314,7 +322,7 @@ class Carmirror(object):
 
 
                 else:
-                    self.drawtext(self.ui_font, "No GPS", (10,10))
+                    self.drawtext(self.ui_font, "No GPS", (10,100))
 
             except KeyboardInterrupt:
                 pass
@@ -325,6 +333,7 @@ class Carmirror(object):
 
             pygame.display.update()
 
+            #pygame.image.save(self.screen, "gps_screen.jpg")
 
 # Create an instance of the PyScope class
 if __name__ == '__main__':
