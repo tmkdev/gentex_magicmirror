@@ -6,16 +6,18 @@ import pygame.freetype
 import gpsd
 import logging
 import obd
-
+from collections import namedtuple
 from pathlib import Path
 
 from gpiozero import LED
 
 #obd.logger.setLevel(obd.logging.DEBUG)
 
-connection = None
+TextDef = namedtuple('TextDef', ['value_expression', 'displayname', 'size', 'position', 'unit_alt'])
 
+connection = None
 gpsconnected = False
+altunit = False
 
 commandlist = {
     'dtc': ['GET_DTC'],
@@ -161,8 +163,10 @@ class Carmirror(object):
     def clearscreen(self):
         self.screen.fill(self._BLACK)
 
-    def formatresponse(self, r, precision=0):
+    def formatresponse(self, r, precision=0, alt_u= None):
         try:
+            if altunit and alt_u:
+                r = r.to(alt_u)
             return "{value:.{precision}f}".format(value=r.value.magnitude, precision=precision)
         except:
             return 'N/A'
@@ -190,16 +194,16 @@ class Carmirror(object):
             try:
                 self.clearscreen()
 
-                r = self.formatresponse(connection.query(obd.commands.SPEED))
+                r = self.formatresponse(connection.query(obd.commands.SPEED), alt_u='mph')
                 self.drawfluent(r, "speed", self._FLUENT_LARGE, (260,190) )
 
                 r = self.formatresponse(connection.query(obd.commands.RPM))
                 self.drawfluent(r, "rpm", self._FLUENT_SMALL, (10,10) )
 
-                r = self.formatresponse(connection.query(obd.commands.COOLANT_TEMP))
+                r = self.formatresponse(connection.query(obd.commands.COOLANT_TEMP), alt_u='F')
                 self.drawfluent(r, "ect", self._FLUENT_MED, (10,90) )
 
-                r = self.formatresponse(connection.query(obd.commands.INTAKE_TEMP))
+                r = self.formatresponse(connection.query(obd.commands.INTAKE_TEMP), alt_u='F')
                 self.drawfluent(r, "iat", self._FLUENT_MED, (10,220) )
 
                 r = self.formatresponse(connection.query(obd.commands.THROTTLE_POS))
@@ -253,7 +257,7 @@ class Carmirror(object):
                 r = self.formatresponse(connection.query(obd.commands.INTAKE_PRESSURE),  precision=1)
                 self.drawfluent(r, "map", self._FLUENT_SMALL, (10,250) )
 
-                r = self.formatresponse(connection.query(obd.commands.SPEED))
+                r = self.formatresponse(connection.query(obd.commands.SPEED), slt_u='mph')
                 self.drawfluent(r, "speed", self._FLUENT_SMALL, (10,330) )
 
                 r = self.formatresponse(connection.query(obd.commands.RPM))
@@ -302,14 +306,18 @@ class Carmirror(object):
                 packet = gpsd.get_current()
 
                 if packet.mode >= 2:
-                    r = int(packet.hspeed)
-                    self.drawfluent(r, "speed", self._FLUENT_LARGE, (260,160) )
+                    r = (packet.hspeed * obd.Unit['meter/second']).to(obd.Unit.kph)
+                    if altunit:
+                        r=r.to('mph')
+                    self.drawfluent(int(r.magnitude), "speed", self._FLUENT_LARGE, (260,160) )
 
                     r = packet.get_time(local_time=True)
                     self.drawfluent(r.strftime('%a, %b %d %Y %-H:%M:%S'), "time", self._FLUENT_SMALL, (10,10) )
 
-                    r = int(packet.alt)
-                    self.drawfluent(r, "altitude", self._FLUENT_SMALL, (10,90) )
+                    r = packet.alt * obd.Unit.meter
+                    if altunit:
+                        r.r.to('ft')
+                    self.drawfluent(int(r.magnitude), "altitude", self._FLUENT_SMALL, (10,90) )
 
                     r = int(packet.track)
                     self.drawfluent(r, "heading", self._FLUENT_SMALL, (10,170) )
@@ -319,7 +327,6 @@ class Carmirror(object):
 
                     r = "{0:.4f}".format(packet.lon)
                     self.drawfluent(r, "longitude", self._FLUENT_SMALL, (10,330) )
-
 
                 else:
                     self.drawtext(self.ui_font, "No GPS", (10,100))
