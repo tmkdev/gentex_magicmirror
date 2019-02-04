@@ -218,10 +218,10 @@ class Carmirror(object):
                 r = self.formatresponse(connection.query(obd.commands.RPM))
                 self.drawfluent(r, "rpm", self._FLUENT_SMALL, (10,10) )
 
-                r = self.formatresponse(connection.query(obd.commands.COOLANT_TEMP), alt_u='F')
+                r = self.formatresponse(connection.query(obd.commands.COOLANT_TEMP), alt_u='degF')
                 self.drawfluent(r, "ect", self._FLUENT_MED, (10,90) )
 
-                r = self.formatresponse(connection.query(obd.commands.INTAKE_TEMP), alt_u='F')
+                r = self.formatresponse(connection.query(obd.commands.INTAKE_TEMP), alt_u='degF')
                 self.drawfluent(r, "iat", self._FLUENT_MED, (10,220) )
 
                 r = self.formatresponse(connection.query(obd.commands.THROTTLE_POS))
@@ -275,7 +275,7 @@ class Carmirror(object):
                 r = self.formatresponse(connection.query(obd.commands.INTAKE_PRESSURE),  precision=1)
                 self.drawfluent(r, "map", self._FLUENT_SMALL, (10,250) )
 
-                r = self.formatresponse(connection.query(obd.commands.SPEED), slt_u='mph')
+                r = self.formatresponse(connection.query(obd.commands.SPEED), alt_u='mph')
                 self.drawfluent(r, "speed", self._FLUENT_SMALL, (10,330) )
 
                 r = self.formatresponse(connection.query(obd.commands.RPM))
@@ -366,6 +366,10 @@ class Carmirror(object):
 if __name__ == '__main__':
     reverse_pin = int(os.getenv('REV_GPIO', 17))
     obd_port = os.getenv('OBD_PORT', '/dev/ttyACM0')
+
+    logging.warning('Reverse activate pin {0}'.format(reverse_pin))
+    logging.warning('ELM327 OBD Serial port {0}'.format(obd_port))
+    logging.warning('Use Alt Units - (Imperial) {0}'.format(altunit))
 
     setscreen(reverse_pin)
 
