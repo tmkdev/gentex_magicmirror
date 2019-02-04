@@ -170,6 +170,24 @@ class Carmirror(object):
             return "{value:.{precision}f}".format(value=r.value.magnitude, precision=precision)
         except:
             return 'N/A'
+    
+    def map_heading(self, heading):
+        if heading >  337.5 or heading < 22.5: 
+            return 'N'
+        if heading >=22.5 and heading < 67.5:
+            return 'NE'
+        if heading >= 67.5 and heading < 112.5:
+            return 'E'
+        if heading >= 112.5 and heading < 157.5:
+            return 'SE'
+        if heading >= 157.5 and heading < 202.5:
+            return 'S'
+        if heading >= 205.5 and heading < 247.5:
+            return 'SW'
+        if heading >= 247.5 and heading < 292.5:
+            return 'W'
+        if heading >= 292.5 and heading < 337.5:
+            return 'NW'
 
     def infoscreen(self, title, message, x=100):
         self.clearscreen()
@@ -319,8 +337,10 @@ class Carmirror(object):
                         r.r.to('ft')
                     self.drawfluent(int(r.magnitude), "altitude", self._FLUENT_SMALL, (10,90) )
 
-                    r = int(packet.track)
-                    self.drawfluent(r, "heading", self._FLUENT_SMALL, (10,170) )
+                    r = packet.track
+                    h = self.map_heading(r)
+                    rtext = '{0:.0f} {1}'.format(r, h)
+                    self.drawfluent(rtext, "heading", self._FLUENT_SMALL, (10,170) )
 
                     r = "{0:.4f}".format(packet.lat)
                     self.drawfluent(r, "latitude", self._FLUENT_SMALL, (10,250) )
