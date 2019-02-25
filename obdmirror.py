@@ -17,7 +17,7 @@ TextDef = namedtuple('TextDef', ['value_expression', 'displayname', 'size', 'pos
 
 connection = None
 gpsconnected = False
-altunit = False
+altunit = True
 
 commandlist = {
     'dtc': ['GET_DTC'],
@@ -166,13 +166,20 @@ class Carmirror(object):
     def formatresponse(self, r, precision=0, alt_u= None):
         try:
             if altunit and alt_u:
-                r = r.to(alt_u)
-            return "{value:.{precision}f}".format(value=r.value.magnitude, precision=precision)
-        except:
+                r = r.value.to(alt_u)
+                value = r.magnitude
+            else:
+                value = r.value.magnitude
+            return "{value:.{precision}f}".format(value=value, precision=precision)
+
+        except AttributeError:
             return 'N/A'
-    
+        except:
+            logging.exception('formatresponse failed')
+            return 'N/A'
+
     def map_heading(self, heading):
-        if heading >  337.5 or heading < 22.5: 
+        if heading >  337.5 or heading < 22.5:
             return 'N'
         if heading >=22.5 and heading < 67.5:
             return 'NE'
@@ -263,34 +270,43 @@ class Carmirror(object):
             try:
                 self.clearscreen()
 
-                r = self.formatresponse(connection.query(obd.commands.MAF), precision=0)
-                self.drawfluent(r, "maf", self._FLUENT_SMALL, (10,10) )
+                raw = connection.query(obd.commands.MAF)
+                r = self.formatresponse(raw, precision=0)
+                self.drawfluent(r, "maf {:~}".format(raw.value.units), self._FLUENT_SMALL, (10,10) )
 
-                r = self.formatresponse(connection.query(obd.commands.COMMANDED_EGR))
-                self.drawfluent(r, "commanded egr", self._FLUENT_SMALL, (10,90) )
+                raw = connection.query(obd.commands.COMMANDED_EGR)
+                r = self.formatresponse(raw)
+                self.drawfluent(r, "cmd egr%", self._FLUENT_SMALL, (10,90) )
 
-                r = self.formatresponse(connection.query(obd.commands.EGR_ERROR))
-                self.drawfluent(r, "egr error", self._FLUENT_SMALL, (10,170) )
+                raw = connection.query(obd.commands.EGR_ERROR)
+                r = self.formatresponse(raw)
+                self.drawfluent(r, "egr error%", self._FLUENT_SMALL, (10,170) )
 
-                r = self.formatresponse(connection.query(obd.commands.INTAKE_PRESSURE),  precision=1)
-                self.drawfluent(r, "map", self._FLUENT_SMALL, (10,250) )
+                raw = connection.query(obd.commands.INTAKE_PRESSURE)
+                r = self.formatresponse(raw,  precision=1)
+                self.drawfluent(r, "map kpa", self._FLUENT_SMALL, (10,250) )
 
-                r = self.formatresponse(connection.query(obd.commands.SPEED), alt_u='mph')
-                self.drawfluent(r, "speed", self._FLUENT_SMALL, (10,330) )
+                raw = connection.query(obd.commands.SPEED)
+                r = self.formatresponse(raw, alt_u='mph')
+                self.drawfluent(r, "speed {:~}".format(raw.value.units), self._FLUENT_SMALL, (10,330) )
 
                 r = self.formatresponse(connection.query(obd.commands.RPM))
                 self.drawfluent(r, "RPM", self._FLUENT_SMALL, (290,330) )
 
-                r = self.formatresponse(connection.query(obd.commands.SHORT_FUEL_TRIM_1), precision=2)
+                raw = connection.query(obd.commands.SHORT_FUEL_TRIM_1)
+                r = self.formatresponse(raw, precision=2)
                 self.drawfluent(r, "stft1", self._FLUENT_SMALL, (290,10) )
 
-                r = self.formatresponse(connection.query(obd.commands.LONG_FUEL_TRIM_1), precision=2)
+                raw = connection.query(obd.commands.LONG_FUEL_TRIM_1)
+                r = self.formatresponse(raw, precision=2)
                 self.drawfluent(r, "ltft1", self._FLUENT_SMALL, (430,10) )
 
-                r = self.formatresponse(connection.query(obd.commands.SHORT_FUEL_TRIM_2), precision=2)
+                raw = connection.query(obd.commands.SHORT_FUEL_TRIM_2)
+                r = self.formatresponse(raw, precision=2)
                 self.drawfluent(r, "stft2", self._FLUENT_SMALL, (290,90) )
 
-                r = self.formatresponse(connection.query(obd.commands.LONG_FUEL_TRIM_2), precision=2)
+                raw = connection.query(obd.commands.LONG_FUEL_TRIM_2)
+                r = self.formatresponse(raw, precision=2)
                 self.drawfluent(r, "ltft2", self._FLUENT_SMALL, (430,90) )
 
                 r = self.formatresponse(connection.query(obd.commands.O2_B1S1), precision=2)
@@ -327,15 +343,15 @@ class Carmirror(object):
                     r = (packet.hspeed * obd.Unit['meter/second']).to(obd.Unit.kph)
                     if altunit:
                         r=r.to('mph')
-                    self.drawfluent(int(r.magnitude), "speed", self._FLUENT_LARGE, (260,160) )
+                    self.drawfluent(int(r.magnitude), "speed {:~}".format(r.units), self._FLUENT_LARGE, (260,160) )
 
                     r = packet.get_time(local_time=True)
                     self.drawfluent(r.strftime('%a, %b %d %Y %-H:%M:%S'), "time", self._FLUENT_SMALL, (10,10) )
 
                     r = packet.alt * obd.Unit.meter
                     if altunit:
-                        r.r.to('ft')
-                    self.drawfluent(int(r.magnitude), "altitude", self._FLUENT_SMALL, (10,90) )
+                        r=r.to('ft')
+                    self.drawfluent(int(r.magnitude), "altitude {:~}".format(r.units), self._FLUENT_SMALL, (10,90) )
 
                     r = packet.track
                     h = self.map_heading(r)
