@@ -8,34 +8,26 @@ import logging
 import obd
 from collections import namedtuple
 from pathlib import Path
+import ast
 
 from gpiozero import LED
+import pint
 
 #obd.logger.setLevel(obd.logging.DEBUG)
 
-TextDef = namedtuple('TextDef', ['value_expression', 'displayname', 'size', 'position', 'unit_alt'])
+ureg = pint.UnitRegistry()
+
+altunitraw = os.getenv('ALTUNIT', 'False')
+altunit = ast.literal_eval(altunitraw)
 
 connection = None
 gpsconnected = False
-altunit = True
 currentcommandlist = None
+
 
 def setscreen(rev_gpio):
     screen_reverse_pin = LED(rev_gpio)
     screen_reverse_pin.blink(on_time=10, off_time=1, background=True)
-
-#def setcommandlist(listname):
-#    global connection, currentcommandlist
-#    if currentcommandlist != listname:
-#        connection.stop()
-#        connection.unwatch_all()
-#
-#        for command in commandlist[listname]:
-#            connection.watch(obd.commands[command])
-#
-#        currentcommandlist = listname
-
-#        connection.start()
 
 def setobdcommands(obdcommandlist, listname):
     global connection, currentcommandlist
@@ -163,7 +155,11 @@ class Carmirror(object):
                 unit_shorthand = "{:~}".format(r.units)
             else:
                 unit_shorthand = "{:~}".format(r.value.units)
-            return "{0} {1}".format(text, unit_shorthand.lower())
+            unit_shorthand = unit_shorthand.lower()
+            unit_shorthand = unit_shorthand.replace('celsius', 'c')
+            unit_shorthand = unit_shorthand.replace('fahrenheit', 'f')
+
+            return "{0} {1}".format(text, unit_shorthand)
         except:
             return text
 
@@ -193,7 +189,7 @@ class Carmirror(object):
     def codes(self):
         self.infoscreen("checking DTCs", "please wait")
 
-        setobdcommands([obd.commmands.GET_DTC], 'dtc')
+        setobdcommands([ obd.commands.GET_DTC ], 'dtc')
         time.sleep(2)
         r = connection.query(obd.commands.GET_DTC)
 
@@ -201,6 +197,13 @@ class Carmirror(object):
             msg = "DTC Count {0}".format(len(r.value))
             self.infoscreen(msg, "DTCs")
             time.sleep(3)
+
+    def draw_obd_kpi(self, obdcommand, title, location,  fontsize=_FLUENT_SMALL, alt_u=None, precision=0, titleunits=False):
+        raw = connection.query(obdcommand)
+        r = self.formatresponse(raw, precision, alt_u)
+        if titleunits:
+            title = self.formattitle(raw, title, alt_u)
+        self.drawfluent(r, title, fontsize, location)
 
     def obd_main(self):
         kpilist = [
@@ -227,39 +230,6 @@ class Carmirror(object):
                 self.draw_obd_kpi(**kpi)
 
 
-#                r = self.formatresponse(connection.query(obd.commands.SPEED), alt_u='mph')
-#                self.drawfluent(r, "speed", self._FLUENT_LARGE, (260,190) )
-
-#                r = self.formatresponse(connection.query(obd.commands.RPM))
-#                self.drawfluent(r, "rpm", self._FLUENT_SMALL, (10,10) )
-
-#                r = self.formatresponse(connection.query(obd.commands.COOLANT_TEMP), alt_u='degF')
-#                self.drawfluent(r, "ect", self._FLUENT_MED, (10,90) )
-
-#                r = self.formatresponse(connection.query(obd.commands.INTAKE_TEMP), alt_u='degF')
-#                self.drawfluent(r, "iat", self._FLUENT_MED, (10,220) )
-
-#                r = self.formatresponse(connection.query(obd.commands.THROTTLE_POS))
-#                self.drawfluent(r, "tps%", self._FLUENT_SMALL, (10,350) )
-
-#                r = self.formatresponse(connection.query(obd.commands.ENGINE_LOAD))
-#                self.drawfluent(r, "load", self._FLUENT_SMALL, (120,350) )
-
-#                r = self.formatresponse(connection.query(obd.commands.TIMING_ADVANCE))
-#                self.drawfluent(r, "advance", self._FLUENT_SMALL, (140,10) )
-
-#                r = self.formatresponse(connection.query(obd.commands.SHORT_FUEL_TRIM_1))
-#                self.drawfluent(r, "stft1", self._FLUENT_SMALL, (300,10) )
-
-#                r = self.formatresponse(connection.query(obd.commands.LONG_FUEL_TRIM_1))
-#                self.drawfluent(r, "ltft1", self._FLUENT_SMALL, (420,10) )
-
-#                r = self.formatresponse(connection.query(obd.commands.SHORT_FUEL_TRIM_2))
-#                self.drawfluent(r, "stft2", self._FLUENT_SMALL, (300,90) )
-
-#                r = self.formatresponse(connection.query(obd.commands.LONG_FUEL_TRIM_2))
-#                self.drawfluent(r, "ltft2", self._FLUENT_SMALL, (420,90) )
-
         except KeyboardInterrupt:
             pass
 
@@ -269,13 +239,6 @@ class Carmirror(object):
 
         pygame.display.update()
 
-
-    def draw_obd_kpi(self, obdcommand, title, location,  fontsize=_FLUENT_SMALL, alt_u=None, precision=0, titleunits=False):
-        raw = connection.query(obdcommand)
-        r = self.formatresponse(raw, precision, alt_u)
-        if titleunits:
-            title = self.formattitle(raw, title, alt_u)
-        self.drawfluent(r,t,fontsize, location)
 
     def obd_airfuel(self):
         kpilist = [
@@ -320,18 +283,21 @@ class Carmirror(object):
                 packet = gpsd.get_current()
 
                 if packet.mode >= 2:
-                    r = (packet.hspeed * obd.Unit['meter/second']).to(obd.Unit.kph)
+                    r = (packet.hspeed * (ureg.meter / ureg.second)).to(ureg.kph)
                     if altunit:
                         r=r.to('mph')
-                    self.drawfluent(int(r.magnitude), "speed {:~}".format(r.units), self._FLUENT_LARGE, (260,160) )
+                    title = "speed {:~}".format(r.units)
+                    self.drawfluent(int(r.magnitude), title.lower(), self._FLUENT_LARGE, (260,160) )
 
                     r = packet.get_time(local_time=True)
                     self.drawfluent(r.strftime('%a, %b %d %Y %-H:%M:%S'), "time", self._FLUENT_SMALL, (10,10) )
 
-                    r = packet.alt * obd.Unit.meter
+                    r = packet.alt * ureg.meter
                     if altunit:
                         r=r.to('ft')
-                    self.drawfluent(int(r.magnitude), "altitude {:~}".format(r.units), self._FLUENT_SMALL, (10,90) )
+                    title = "altitude {:~}".format(r.units)
+
+                    self.drawfluent(int(r.magnitude), title.lower(), self._FLUENT_SMALL, (10,90) )
 
                     r = packet.track
                     h = self.map_heading(r)
@@ -358,7 +324,6 @@ class Carmirror(object):
 
             #pygame.image.save(self.screen, "gps_screen.jpg")
 
-# Create an instance of the PyScope class
 if __name__ == '__main__':
     reverse_pin = int(os.getenv('REV_GPIO', 17))
     obd_port = os.getenv('OBD_PORT', '/dev/ttyACM0')
