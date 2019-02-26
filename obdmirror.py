@@ -18,54 +18,33 @@ TextDef = namedtuple('TextDef', ['value_expression', 'displayname', 'size', 'pos
 connection = None
 gpsconnected = False
 altunit = True
-
-commandlist = {
-    'dtc': ['GET_DTC'],
-    'obdmain': [
-        'ENGINE_LOAD',
-        'COOLANT_TEMP',
-        'SHORT_FUEL_TRIM_1',
-        'LONG_FUEL_TRIM_1',
-        'SHORT_FUEL_TRIM_2',
-        'LONG_FUEL_TRIM_2',
-        'RPM',
-        'SPEED',
-        'TIMING_ADVANCE',
-        'INTAKE_TEMP',
-        'THROTTLE_POS'
-    ],
-    'airfuel': [
-        'SHORT_FUEL_TRIM_1',
-        'LONG_FUEL_TRIM_1',
-        'SHORT_FUEL_TRIM_2',
-        'LONG_FUEL_TRIM_2',
-        'O2_B1S1',
-        'O2_B1S2',
-        'O2_B2S1',
-        'O2_B2S2',
-        'COMMANDED_EGR',
-        'EGR_ERROR',
-        'MAF',
-        'INTAKE_PRESSURE',
-        'RPM',
-        'SPEED',
-    ]
-}
-
 currentcommandlist = None
 
 def setscreen(rev_gpio):
     screen_reverse_pin = LED(rev_gpio)
     screen_reverse_pin.blink(on_time=10, off_time=1, background=True)
 
-def setcommandlist(listname):
+#def setcommandlist(listname):
+#    global connection, currentcommandlist
+#    if currentcommandlist != listname:
+#        connection.stop()
+#        connection.unwatch_all()
+#
+#        for command in commandlist[listname]:
+#            connection.watch(obd.commands[command])
+#
+#        currentcommandlist = listname
+
+#        connection.start()
+
+def setobdcommands(obdcommandlist, listname):
     global connection, currentcommandlist
     if currentcommandlist != listname:
         connection.stop()
         connection.unwatch_all()
 
-        for command in commandlist[listname]:
-            connection.watch(obd.commands[command])
+        for command in obdcommandlist:
+            connection.watch(command)
 
         currentcommandlist = listname
 
@@ -214,7 +193,7 @@ class Carmirror(object):
     def codes(self):
         self.infoscreen("checking DTCs", "please wait")
 
-        setcommandlist('dtc')
+        setobdcommands([obd.commmands.GET_DTC], 'dtc')
         time.sleep(2)
         r = connection.query(obd.commands.GET_DTC)
 
@@ -224,71 +203,87 @@ class Carmirror(object):
             time.sleep(3)
 
     def obd_main(self):
-            setcommandlist('obdmain')
+        kpilist = [
+            {'obdcommand': obd.commands.SPEED, 'title': 'speed', 'fontsize': self._FLUENT_LARGE, 'location': (260,190), 'titleunits': True, 'alt_u': 'mph'},
+            {'obdcommand': obd.commands.RPM, 'title': 'rpm', 'location': (10,10) },
+            {'obdcommand': obd.commands.COOLANT_TEMP, 'title': 'ect', 'fontsize': self._FLUENT_MED, 'location': (10,90), 'titleunits': True, 'alt_u': 'degF'},
+            {'obdcommand': obd.commands.INTAKE_TEMP, 'title': 'iat', 'fontsize': self._FLUENT_MED, 'location': (10,220), 'titleunits': True, 'alt_u': 'degF'},
+            {'obdcommand': obd.commands.THROTTLE_POS, 'title': 'tps %', 'location': (10,350) },
+            {'obdcommand': obd.commands.ENGINE_LOAD, 'title': 'load %', 'location': (120,350) },
+            {'obdcommand': obd.commands.TIMING_ADVANCE, 'title': 'timing', 'location': (140,10) },
+            {'obdcommand': obd.commands.SHORT_FUEL_TRIM_1, 'title': 'stft1 %', 'location': (300,10) },
+            {'obdcommand': obd.commands.LONG_FUEL_TRIM_1, 'title': 'ltft1 %', 'location': (420,10) },
+            {'obdcommand': obd.commands.SHORT_FUEL_TRIM_2, 'title': 'stft1 %', 'location': (300,90) },
+            {'obdcommand': obd.commands.LONG_FUEL_TRIM_2, 'title': 'ltft1 %', 'location': (420,90) },
+        ]
 
-            try:
-                self.clearscreen()
+        obdcommandlist = [x['obdcommand'] for x in kpilist]
+        setobdcommands(obdcommandlist, 'main')
 
-                r = self.formatresponse(connection.query(obd.commands.SPEED), alt_u='mph')
-                self.drawfluent(r, "speed", self._FLUENT_LARGE, (260,190) )
+        try:
+            self.clearscreen()
 
-                r = self.formatresponse(connection.query(obd.commands.RPM))
-                self.drawfluent(r, "rpm", self._FLUENT_SMALL, (10,10) )
+            for kpi in kpilist:
+                self.draw_obd_kpi(**kpi)
 
-                r = self.formatresponse(connection.query(obd.commands.COOLANT_TEMP), alt_u='degF')
-                self.drawfluent(r, "ect", self._FLUENT_MED, (10,90) )
 
-                r = self.formatresponse(connection.query(obd.commands.INTAKE_TEMP), alt_u='degF')
-                self.drawfluent(r, "iat", self._FLUENT_MED, (10,220) )
+#                r = self.formatresponse(connection.query(obd.commands.SPEED), alt_u='mph')
+#                self.drawfluent(r, "speed", self._FLUENT_LARGE, (260,190) )
 
-                r = self.formatresponse(connection.query(obd.commands.THROTTLE_POS))
-                self.drawfluent(r, "tps%", self._FLUENT_SMALL, (10,350) )
+#                r = self.formatresponse(connection.query(obd.commands.RPM))
+#                self.drawfluent(r, "rpm", self._FLUENT_SMALL, (10,10) )
 
-                r = self.formatresponse(connection.query(obd.commands.ENGINE_LOAD))
-                self.drawfluent(r, "load", self._FLUENT_SMALL, (120,350) )
+#                r = self.formatresponse(connection.query(obd.commands.COOLANT_TEMP), alt_u='degF')
+#                self.drawfluent(r, "ect", self._FLUENT_MED, (10,90) )
 
-                r = self.formatresponse(connection.query(obd.commands.TIMING_ADVANCE))
-                self.drawfluent(r, "advance", self._FLUENT_SMALL, (140,10) )
+#                r = self.formatresponse(connection.query(obd.commands.INTAKE_TEMP), alt_u='degF')
+#                self.drawfluent(r, "iat", self._FLUENT_MED, (10,220) )
 
-                r = self.formatresponse(connection.query(obd.commands.SHORT_FUEL_TRIM_1))
-                self.drawfluent(r, "stft1", self._FLUENT_SMALL, (300,10) )
+#                r = self.formatresponse(connection.query(obd.commands.THROTTLE_POS))
+#                self.drawfluent(r, "tps%", self._FLUENT_SMALL, (10,350) )
 
-                r = self.formatresponse(connection.query(obd.commands.LONG_FUEL_TRIM_1))
-                self.drawfluent(r, "ltft1", self._FLUENT_SMALL, (420,10) )
+#                r = self.formatresponse(connection.query(obd.commands.ENGINE_LOAD))
+#                self.drawfluent(r, "load", self._FLUENT_SMALL, (120,350) )
 
-                r = self.formatresponse(connection.query(obd.commands.SHORT_FUEL_TRIM_2))
-                self.drawfluent(r, "stft2", self._FLUENT_SMALL, (300,90) )
+#                r = self.formatresponse(connection.query(obd.commands.TIMING_ADVANCE))
+#                self.drawfluent(r, "advance", self._FLUENT_SMALL, (140,10) )
 
-                r = self.formatresponse(connection.query(obd.commands.LONG_FUEL_TRIM_2))
-                self.drawfluent(r, "ltft2", self._FLUENT_SMALL, (420,90) )
+#                r = self.formatresponse(connection.query(obd.commands.SHORT_FUEL_TRIM_1))
+#                self.drawfluent(r, "stft1", self._FLUENT_SMALL, (300,10) )
 
-            except KeyboardInterrupt:
-                pass
+#                r = self.formatresponse(connection.query(obd.commands.LONG_FUEL_TRIM_1))
+#                self.drawfluent(r, "ltft1", self._FLUENT_SMALL, (420,10) )
 
-            except:
-                self.drawtext(self.ui_font, "OBD Error", (10,10))
-                logging.exception('OBD Failure.. ')
+#                r = self.formatresponse(connection.query(obd.commands.SHORT_FUEL_TRIM_2))
+#                self.drawfluent(r, "stft2", self._FLUENT_SMALL, (300,90) )
 
-            pygame.display.update()
+#                r = self.formatresponse(connection.query(obd.commands.LONG_FUEL_TRIM_2))
+#                self.drawfluent(r, "ltft2", self._FLUENT_SMALL, (420,90) )
 
-            #pygame.image.save(self.screen, "obd_screen.jpg")
+        except KeyboardInterrupt:
+            pass
 
-    def draw_obd_kpi(self, obdcommand, title, location,  fontsize=_FLUENT_SMALL, alt_u=None, precision=0):
+        except:
+            self.drawtext(self.ui_font, "OBD Error", (10,10))
+            logging.exception('OBD Failure.. ')
+
+        pygame.display.update()
+
+
+    def draw_obd_kpi(self, obdcommand, title, location,  fontsize=_FLUENT_SMALL, alt_u=None, precision=0, titleunits=False):
         raw = connection.query(obdcommand)
         r = self.formatresponse(raw, precision, alt_u)
-        t = self.formattitle(raw, title, alt_u)
+        if titleunits:
+            title = self.formattitle(raw, title, alt_u)
         self.drawfluent(r,t,fontsize, location)
 
     def obd_airfuel(self):
-        #TODO: Refactor and use the list..
-        setcommandlist('airfuel')
-
         kpilist = [
-            {'obdcommand': obd.commands.MAF, 'title':"maf", 'location':(10,10)},
+            {'obdcommand': obd.commands.MAF, 'title':"maf", 'location':(10,10), 'titleunits': True},
             {'obdcommand': obd.commands.COMMANDED_EGR, 'title':"cmd egr %", 'location':(10,90)},
             {'obdcommand': obd.commands.EGR_ERROR, 'title':'egr error %', 'location':(10,170)},
-            {'obdcommand': obd.commands.INTAKE_PRESSURE, 'title':"map kpa", 'location':(10,250)},
-            {'obdcommand': obd.commands.SPEED, 'title':"speed", 'location':(10,330), 'alt_u':'mph'},
+            {'obdcommand': obd.commands.INTAKE_PRESSURE, 'title':"map", 'location':(10,250), 'titleunits': True},
+            {'obdcommand': obd.commands.SPEED, 'title':"speed", 'location':(10,330), 'alt_u':'mph', 'titleunits': True},
             {'obdcommand': obd.commands.RPM, 'title':"rpm", 'location':(290,330) },
             {'obdcommand': obd.commands.SHORT_FUEL_TRIM_1, 'title':"stft1", 'location':(290,10), 'precision':2 },
             {'obdcommand': obd.commands.LONG_FUEL_TRIM_1, 'title':"ltft1", 'location':(430,10), 'precision':2 },
@@ -298,63 +293,16 @@ class Carmirror(object):
             {'obdcommand': obd.commands.O2_B1S2, 'title':"o2b1s2", 'location':(430,170), 'precision':2 },
             {'obdcommand': obd.commands.O2_B2S1, 'title':"o2b2s1", 'location':(290,250), 'precision':2 },
             {'obdcommand': obd.commands.O2_B2S2, 'title':"o2b2s2", 'location':(430,250), 'precision':2 },
-
         ]
 
+        obdcommandlist = [x['obdcommand'] for x in kpilist]
+        setobdcommands(obdcommandlist, 'airfuel')
 
         try:
             self.clearscreen()
 
             for kpi in kpilist:
                 self.draw_obd_kpi(**kpi)
-
-#                raw = connection.query(obd.commands.COMMANDED_EGR)
-#                r = self.formatresponse(raw)
-#                self.drawfluent(r, "cmd egr%", self._FLUENT_SMALL, (10,90) )
-
-#                raw = connection.query(obd.commands.EGR_ERROR)
-#                r = self.formatresponse(raw)
-#                self.drawfluent(r, "egr error%", self._FLUENT_SMALL, (10,170) )
-
-#                raw = connection.query(obd.commands.INTAKE_PRESSURE)
-#                r = self.formatresponse(raw,  precision=1)
-#                self.drawfluent(r, "map kpa", self._FLUENT_SMALL, (10,250) )
-
-#                raw = connection.query(obd.commands.SPEED)
-#                r = self.formatresponse(raw, alt_u='mph')
-#                self.drawfluent(r, "speed {:~}".format(raw.value.units), self._FLUENT_SMALL, (10,330) )
-
-#                r = self.formatresponse(connection.query(obd.commands.RPM))
-#                self.drawfluent(r, "RPM", self._FLUENT_SMALL, (290,330) )
-
-#                raw = connection.query(obd.commands.SHORT_FUEL_TRIM_1)
-#                r = self.formatresponse(raw, precision=2)
-#                self.drawfluent(r, "stft1", self._FLUENT_SMALL, (290,10) )
-
-#                raw = connection.query(obd.commands.LONG_FUEL_TRIM_1)
-#                r = self.formatresponse(raw, precision=2)
-#                self.drawfluent(r, "ltft1", self._FLUENT_SMALL, (430,10) )
-
-#                raw = connection.query(obd.commands.SHORT_FUEL_TRIM_2)
-#                r = self.formatresponse(raw, precision=2)
-#                self.drawfluent(r, "stft2", self._FLUENT_SMALL, (290,90) )
-
-#                raw = connection.query(obd.commands.LONG_FUEL_TRIM_2)
-#                r = self.formatresponse(raw, precision=2)
-#                self.drawfluent(r, "ltft2", self._FLUENT_SMALL, (430,90) )
-
-#                r = self.formatresponse(connection.query(obd.commands.O2_B1S1), precision=2)
-#                self.drawfluent(r, "o2 b1 s1", self._FLUENT_SMALL, (290,170) )
-
-#                r = self.formatresponse(connection.query(obd.commands.O2_B1S2), precision=2)
-#                self.drawfluent(r, "o2 b1 s2", self._FLUENT_SMALL, (430,170) )
-
-#                r = self.formatresponse(connection.query(obd.commands.O2_B2S1), precision=2)
-#                self.drawfluent(r, "o2 b2 s1", self._FLUENT_SMALL, (290,250) )
-
-#                r = self.formatresponse(connection.query(obd.commands.O2_B2S1), precision=2)
-#                self.drawfluent(r, "o2 b2 s2", self._FLUENT_SMALL, (430,250) )
-
 
         except KeyboardInterrupt:
             pass
