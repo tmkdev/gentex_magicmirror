@@ -178,6 +178,17 @@ class Carmirror(object):
             logging.exception('formatresponse failed')
             return 'N/A'
 
+    def formattitle(self, r, text, alt_u=None):
+        try:
+            if altunit and alt_u:
+                r = r.value.to(alt_u)
+                unit_shorthand = "{:~}".format(r.units)
+            else:
+                unit_shorthand = "{:~}".format(r.value.units)
+            return "{0} {1}".format(text, unit_shorthand)
+        except:
+            return text
+
     def map_heading(self, heading):
         if heading >  337.5 or heading < 22.5:
             return 'N'
@@ -272,7 +283,8 @@ class Carmirror(object):
 
                 raw = connection.query(obd.commands.MAF)
                 r = self.formatresponse(raw, precision=0)
-                self.drawfluent(r, "maf {:~}".format(raw.value.units), self._FLUENT_SMALL, (10,10) )
+                t = self.formattitle(raw, "maf")
+                self.drawfluent(r, t, self._FLUENT_SMALL, (10,10) )
 
                 raw = connection.query(obd.commands.COMMANDED_EGR)
                 r = self.formatresponse(raw)
