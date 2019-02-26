@@ -184,7 +184,7 @@ class Carmirror(object):
                 unit_shorthand = "{:~}".format(r.units)
             else:
                 unit_shorthand = "{:~}".format(r.value.units)
-            return "{0} {1}".format(text, unit_shorthand)
+            return "{0} {1}".format(text, unit_shorthand.lower())
         except:
             return text
 
@@ -273,31 +273,31 @@ class Carmirror(object):
 
             #pygame.image.save(self.screen, "obd_screen.jpg")
 
-    def draw_obd_kpi(obdcommand, title, location,  fontsize=self._FLUENT_SMALL, alt_u=None, precision=0):
+    def draw_obd_kpi(self, obdcommand, title, location,  fontsize=_FLUENT_SMALL, alt_u=None, precision=0):
         raw = connection.query(obdcommand)
         r = self.formatresponse(raw, precision, alt_u)
         t = self.formattitle(raw, title, alt_u)
         self.drawfluent(r,t,fontsize, location)
 
     def obd_airfuel(self):
-        #TODO: Refactor and use the list.. 
+        #TODO: Refactor and use the list..
         setcommandlist('airfuel')
 
         kpilist = [
-            {'obdcommand': obd.commands.MAF, 'title'="maf", 'location'=(10,10)},
-            {'obdcommand': obd.commands.COMMANDED_EGR, 'title'="cmd egr %", 'location'=(10,90)},
-            {'obdcommand': obd.commands.EGR_ERROR, 'title'="egr error %", 'location'=(10,170)},
-            {'obdcommand': obd.commands.INTAKE_PRESSURE, 'title'="map kpa", 'location'=(10,250)},
-            {'obdcommand': obd.commands.SPEED, 'title'="speed", 'location'=(10,330), 'alt_u'='mph'},
-            {'obdcommand': obd.commands.RPM, 'title'="rpm", 'location'=(290,330) },
-            {'obdcommand': obd.commands.SHORT_FUEL_TRIM_1, 'title'="stft1", 'location'=(290,10), 'precision'=2 },
-            {'obdcommand': obd.commands.LONG_FUEL_TRIM_1, 'title'="ltft1", 'location'=(430,10), 'precision'=2 },
-            {'obdcommand': obd.commands.SHORT_FUEL_TRIM_2, 'title'="stft2", 'location'=(290,90), 'precision'=2 },
-            {'obdcommand': obd.commands.LONG_FUEL_TRIM_2, 'title'="ltft2", 'location'=(430,90), 'precision'=2 },
-            {'obdcommand': obd.commands.O2_B1S1, 'title'="o2b1s1", 'location'=(290,170), 'precision'=2 },
-            {'obdcommand': obd.commands.O2_B1S2, 'title'="o2b1s2", 'location'=(430,170), 'precision'=2 },
-            {'obdcommand': obd.commands.O2_B2S1, 'title'="o2b2s1", 'location'=(290,250), 'precision'=2 },
-            {'obdcommand': obd.commands.O2_B2S2, 'title'="o2b2s2", 'location'=(430,250), 'precision'=2 },
+            {'obdcommand': obd.commands.MAF, 'title':"maf", 'location':(10,10)},
+            {'obdcommand': obd.commands.COMMANDED_EGR, 'title':"cmd egr %", 'location':(10,90)},
+            {'obdcommand': obd.commands.EGR_ERROR, 'title':'egr error %', 'location':(10,170)},
+            {'obdcommand': obd.commands.INTAKE_PRESSURE, 'title':"map kpa", 'location':(10,250)},
+            {'obdcommand': obd.commands.SPEED, 'title':"speed", 'location':(10,330), 'alt_u':'mph'},
+            {'obdcommand': obd.commands.RPM, 'title':"rpm", 'location':(290,330) },
+            {'obdcommand': obd.commands.SHORT_FUEL_TRIM_1, 'title':"stft1", 'location':(290,10), 'precision':2 },
+            {'obdcommand': obd.commands.LONG_FUEL_TRIM_1, 'title':"ltft1", 'location':(430,10), 'precision':2 },
+            {'obdcommand': obd.commands.SHORT_FUEL_TRIM_2, 'title':"stft2", 'location':(290,90), 'precision':2 },
+            {'obdcommand': obd.commands.LONG_FUEL_TRIM_2, 'title':"ltft2", 'location':(430,90), 'precision':2 },
+            {'obdcommand': obd.commands.O2_B1S1, 'title':"o2b1s1", 'location':(290,170), 'precision':2 },
+            {'obdcommand': obd.commands.O2_B1S2, 'title':"o2b1s2", 'location':(430,170), 'precision':2 },
+            {'obdcommand': obd.commands.O2_B2S1, 'title':"o2b2s1", 'location':(290,250), 'precision':2 },
+            {'obdcommand': obd.commands.O2_B2S2, 'title':"o2b2s2", 'location':(430,250), 'precision':2 },
 
         ]
 
