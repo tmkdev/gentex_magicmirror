@@ -14,6 +14,7 @@ Driving reverse lamp pin (9) with a duty cycle of 10s on, 1s off keeps it from t
 Mirror Pinout: https://ls1tech.com/forums/stereo-electronics/1887542-need-pinout-16-pin-mirror-camera-display.html#&gid=1&pid=1 
 
 Possible pins for the connector: https://www.mouser.com/ProductDetail/TE-Connectivity-AMP/175265-1?qs=AplfTeSvkkBL3BcjZdHR5Q%3D%3D
+Possible Mating connector: https://www.mouser.com/datasheet/2/418/NG_CD_179054_O-659708.pdf
 
 Example of the thing runing: https://photos.app.goo.gl/M7oZyTBy9QhEEuzM9 
 
