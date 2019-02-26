@@ -71,7 +71,6 @@ def setcommandlist(listname):
 
         connection.start()
 
-
 def configobd(port='/dev/pts/3'):
     try:
         global connection
@@ -274,76 +273,97 @@ class Carmirror(object):
 
             #pygame.image.save(self.screen, "obd_screen.jpg")
 
+    def draw_obd_kpi(obdcommand, title, location,  fontsize=self._FLUENT_SMALL, alt_u=None, precision=0):
+        raw = connection.query(obdcommand)
+        r = self.formatresponse(raw, precision, alt_u)
+        t = self.formattitle(raw, title, alt_u)
+        self.drawfluent(r,t,fontsize, location)
 
     def obd_airfuel(self):
-            setcommandlist('airfuel')
+        #TODO: Refactor and use the list.. 
+        setcommandlist('airfuel')
 
-            try:
-                self.clearscreen()
+        kpilist = [
+            {'obdcommand': obd.commands.MAF, 'title'="maf", 'location'=(10,10)},
+            {'obdcommand': obd.commands.COMMANDED_EGR, 'title'="cmd egr %", 'location'=(10,90)},
+            {'obdcommand': obd.commands.EGR_ERROR, 'title'="egr error %", 'location'=(10,170)},
+            {'obdcommand': obd.commands.INTAKE_PRESSURE, 'title'="map kpa", 'location'=(10,250)},
+            {'obdcommand': obd.commands.SPEED, 'title'="speed", 'location'=(10,330), 'alt_u'='mph'},
+            {'obdcommand': obd.commands.RPM, 'title'="rpm", 'location'=(290,330) },
+            {'obdcommand': obd.commands.SHORT_FUEL_TRIM_1, 'title'="stft1", 'location'=(290,10), 'precision'=2 },
+            {'obdcommand': obd.commands.LONG_FUEL_TRIM_1, 'title'="ltft1", 'location'=(430,10), 'precision'=2 },
+            {'obdcommand': obd.commands.SHORT_FUEL_TRIM_2, 'title'="stft2", 'location'=(290,90), 'precision'=2 },
+            {'obdcommand': obd.commands.LONG_FUEL_TRIM_2, 'title'="ltft2", 'location'=(430,90), 'precision'=2 },
+            {'obdcommand': obd.commands.O2_B1S1, 'title'="o2b1s1", 'location'=(290,170), 'precision'=2 },
+            {'obdcommand': obd.commands.O2_B1S2, 'title'="o2b1s2", 'location'=(430,170), 'precision'=2 },
+            {'obdcommand': obd.commands.O2_B2S1, 'title'="o2b2s1", 'location'=(290,250), 'precision'=2 },
+            {'obdcommand': obd.commands.O2_B2S2, 'title'="o2b2s2", 'location'=(430,250), 'precision'=2 },
 
-                raw = connection.query(obd.commands.MAF)
-                r = self.formatresponse(raw, precision=0)
-                t = self.formattitle(raw, "maf")
-                self.drawfluent(r, t, self._FLUENT_SMALL, (10,10) )
-
-                raw = connection.query(obd.commands.COMMANDED_EGR)
-                r = self.formatresponse(raw)
-                self.drawfluent(r, "cmd egr%", self._FLUENT_SMALL, (10,90) )
-
-                raw = connection.query(obd.commands.EGR_ERROR)
-                r = self.formatresponse(raw)
-                self.drawfluent(r, "egr error%", self._FLUENT_SMALL, (10,170) )
-
-                raw = connection.query(obd.commands.INTAKE_PRESSURE)
-                r = self.formatresponse(raw,  precision=1)
-                self.drawfluent(r, "map kpa", self._FLUENT_SMALL, (10,250) )
-
-                raw = connection.query(obd.commands.SPEED)
-                r = self.formatresponse(raw, alt_u='mph')
-                self.drawfluent(r, "speed {:~}".format(raw.value.units), self._FLUENT_SMALL, (10,330) )
-
-                r = self.formatresponse(connection.query(obd.commands.RPM))
-                self.drawfluent(r, "RPM", self._FLUENT_SMALL, (290,330) )
-
-                raw = connection.query(obd.commands.SHORT_FUEL_TRIM_1)
-                r = self.formatresponse(raw, precision=2)
-                self.drawfluent(r, "stft1", self._FLUENT_SMALL, (290,10) )
-
-                raw = connection.query(obd.commands.LONG_FUEL_TRIM_1)
-                r = self.formatresponse(raw, precision=2)
-                self.drawfluent(r, "ltft1", self._FLUENT_SMALL, (430,10) )
-
-                raw = connection.query(obd.commands.SHORT_FUEL_TRIM_2)
-                r = self.formatresponse(raw, precision=2)
-                self.drawfluent(r, "stft2", self._FLUENT_SMALL, (290,90) )
-
-                raw = connection.query(obd.commands.LONG_FUEL_TRIM_2)
-                r = self.formatresponse(raw, precision=2)
-                self.drawfluent(r, "ltft2", self._FLUENT_SMALL, (430,90) )
-
-                r = self.formatresponse(connection.query(obd.commands.O2_B1S1), precision=2)
-                self.drawfluent(r, "o2 b1 s1", self._FLUENT_SMALL, (290,170) )
-
-                r = self.formatresponse(connection.query(obd.commands.O2_B1S2), precision=2)
-                self.drawfluent(r, "o2 b1 s2", self._FLUENT_SMALL, (430,170) )
-
-                r = self.formatresponse(connection.query(obd.commands.O2_B2S1), precision=2)
-                self.drawfluent(r, "o2 b2 s1", self._FLUENT_SMALL, (290,250) )
-
-                r = self.formatresponse(connection.query(obd.commands.O2_B2S1), precision=2)
-                self.drawfluent(r, "o2 b2 s2", self._FLUENT_SMALL, (430,250) )
+        ]
 
 
-            except KeyboardInterrupt:
-                pass
+        try:
+            self.clearscreen()
 
-            except:
-                self.drawtext(self.ui_font, "OBD Error", (10,10))
-                logging.exception('OBD Failure.. ')
+            for kpi in kpilist:
+                self.draw_obd_kpi(**kpi)
 
-            pygame.display.update()
+#                raw = connection.query(obd.commands.COMMANDED_EGR)
+#                r = self.formatresponse(raw)
+#                self.drawfluent(r, "cmd egr%", self._FLUENT_SMALL, (10,90) )
 
-            #pygame.image.save(self.screen, "airfuel_screen.jpg")
+#                raw = connection.query(obd.commands.EGR_ERROR)
+#                r = self.formatresponse(raw)
+#                self.drawfluent(r, "egr error%", self._FLUENT_SMALL, (10,170) )
+
+#                raw = connection.query(obd.commands.INTAKE_PRESSURE)
+#                r = self.formatresponse(raw,  precision=1)
+#                self.drawfluent(r, "map kpa", self._FLUENT_SMALL, (10,250) )
+
+#                raw = connection.query(obd.commands.SPEED)
+#                r = self.formatresponse(raw, alt_u='mph')
+#                self.drawfluent(r, "speed {:~}".format(raw.value.units), self._FLUENT_SMALL, (10,330) )
+
+#                r = self.formatresponse(connection.query(obd.commands.RPM))
+#                self.drawfluent(r, "RPM", self._FLUENT_SMALL, (290,330) )
+
+#                raw = connection.query(obd.commands.SHORT_FUEL_TRIM_1)
+#                r = self.formatresponse(raw, precision=2)
+#                self.drawfluent(r, "stft1", self._FLUENT_SMALL, (290,10) )
+
+#                raw = connection.query(obd.commands.LONG_FUEL_TRIM_1)
+#                r = self.formatresponse(raw, precision=2)
+#                self.drawfluent(r, "ltft1", self._FLUENT_SMALL, (430,10) )
+
+#                raw = connection.query(obd.commands.SHORT_FUEL_TRIM_2)
+#                r = self.formatresponse(raw, precision=2)
+#                self.drawfluent(r, "stft2", self._FLUENT_SMALL, (290,90) )
+
+#                raw = connection.query(obd.commands.LONG_FUEL_TRIM_2)
+#                r = self.formatresponse(raw, precision=2)
+#                self.drawfluent(r, "ltft2", self._FLUENT_SMALL, (430,90) )
+
+#                r = self.formatresponse(connection.query(obd.commands.O2_B1S1), precision=2)
+#                self.drawfluent(r, "o2 b1 s1", self._FLUENT_SMALL, (290,170) )
+
+#                r = self.formatresponse(connection.query(obd.commands.O2_B1S2), precision=2)
+#                self.drawfluent(r, "o2 b1 s2", self._FLUENT_SMALL, (430,170) )
+
+#                r = self.formatresponse(connection.query(obd.commands.O2_B2S1), precision=2)
+#                self.drawfluent(r, "o2 b2 s1", self._FLUENT_SMALL, (290,250) )
+
+#                r = self.formatresponse(connection.query(obd.commands.O2_B2S1), precision=2)
+#                self.drawfluent(r, "o2 b2 s2", self._FLUENT_SMALL, (430,250) )
+
+
+        except KeyboardInterrupt:
+            pass
+
+        except:
+            self.drawtext(self.ui_font, "OBD Error", (10,10))
+            logging.exception('OBD Failure.. ')
+
+        pygame.display.update()
 
 
     def gpsscreen(self):
