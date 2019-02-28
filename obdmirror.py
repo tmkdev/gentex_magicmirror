@@ -3,12 +3,14 @@ import pygame
 import time
 import random
 import pygame.freetype
+import pygame.gfxdraw
 import gpsd
 import logging
 import obd
 from collections import namedtuple
 from pathlib import Path
 import ast
+from math import pi
 
 from gpiozero import LED
 import pint
@@ -64,7 +66,9 @@ class Carmirror(object):
     screen = None
     _WHITE = (255,255,255)
     _GREY = (128,128,128)
+    _DARKGREY = (32,32,32)
     _BLACK = (0,0,0)
+    _WARNING = (255,51,0)
 
     _FLUENT_SMALL = 0
     _FLUENT_MED = 1
@@ -205,6 +209,8 @@ class Carmirror(object):
             title = self.formattitle(raw, title, alt_u)
         self.drawfluent(r, title, fontsize, location)
 
+        return raw
+
     def obd_main(self):
         kpilist = [
             {'obdcommand': obd.commands.SPEED, 'title': 'speed', 'fontsize': self._FLUENT_LARGE, 'location': (260,190), 'titleunits': True, 'alt_u': 'mph'},
@@ -276,6 +282,38 @@ class Carmirror(object):
 
         pygame.display.update()
 
+    def obd_gauge(self, command, title, alt_u=None, titleunits=False, min=0, max=200, warn=135):
+        cmdlist = [command]
+        setobdcommands(cmdlist, command.name)
+
+        try:
+            self.clearscreen()
+
+            pygame.draw.circle(self.screen, self._DARKGREY, (320,240), 240)
+            pygame.draw.circle(self.screen, self._BLACK, (320,240), 210)
+
+            kpi = {'obdcommand': command, 'title': title, 'fontsize': self._FLUENT_MED, 'location':(180,160), 'alt_u': alt_u, 'titleunits': titleunits}
+            raw = self.draw_obd_kpi(**kpi)
+
+            ratio = raw.value.magnitude / max
+
+            start = pi*1.5 - ((2*pi) * ratio)
+            end = pi*1.5
+
+            color=self._WHITE if raw.value.magnitude < warn else self._WARNING
+            moirerange=10 if ratio > 0.02 else 1
+
+            #Draw arc multiple times - prevents moire. Stupid pygame.
+            for x in range(moirerange):
+                pygame.draw.arc(self.screen, color, [80, 0, 480, 480], start+(0.015*x), end, 30)
+
+
+        except AttributeError:
+            pass
+        except:
+            logging.exception('Gauge issue - please check')
+
+        pygame.display.update()
 
     def gpsscreen(self):
             try:
@@ -322,7 +360,6 @@ class Carmirror(object):
 
             pygame.display.update()
 
-            #pygame.image.save(self.screen, "gps_screen.jpg")
 
 if __name__ == '__main__':
     reverse_pin = int(os.getenv('REV_GPIO', 17))
@@ -343,16 +380,22 @@ if __name__ == '__main__':
     if connection:
         mirror.codes()
 
+    gauges = [
+                {'command': obd.commands.SPEED, 'title': 'speed', 'max': 200, 'warn': 135, 'alt_u': 'mph', 'titleunits': True},
+                {'command': obd.commands.RPM, 'title': 'rpm', 'max': 6500, 'warn': 5900, 'alt_u': None, 'titleunits': False},
+                {'command': obd.commands.ENGINE_LOAD, 'title': 'load %', 'max': 100, 'warn': 90, 'titleunits': False},
+            ]
+
+
     while True:
-        for x in range(300):
+        for x in range(100):
             mirror.gpsscreen()
         if connection:
             logging.warning(connection.status())
-            for x in range(300):
+            for x in range(200):
                 mirror.obd_main()
-            for x in range(300):
+            for x in range(200):
                 mirror.obd_airfuel()
-
-
-
-
+        for gauge in gauges:
+            for x in range(200):
+                mirror.obd_gauge(**gauge)
