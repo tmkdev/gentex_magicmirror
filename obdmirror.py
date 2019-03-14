@@ -361,6 +361,23 @@ class Carmirror(object):
 
             pygame.display.update()
 
+    def accelerometer(self):
+        ax = math.random() * 0.5
+        ay = math.random() * 0.5
+        az = math.random() * 0.5
+
+        self.clearscreen()
+
+        pygame.draw.circle(self.screen, self._WHITE, (320,240), 230)
+        pygame.draw.circle(self.screen, self._DARKGREY, (320,240), 210)
+
+        dy = int((ay / 1.25) * 230)
+        dx = int((ax / 1.25) * 230)
+
+        pygame.draw.circle(self.screen, self._WHITE, (320+dx,240+dy), 10)
+        pygame.draw.circle(self.screen, self._BLACK, (320+dx,240+dy), 6)
+
+        pygame.display.update()
 
 
 if __name__ == '__main__':
@@ -405,6 +422,8 @@ if __name__ == '__main__':
 
 
     while True:
+        for x in range(600):
+            mirror.accelerometer()
         for x in range(600):
             mirror.gpsscreen()
         if connection:
