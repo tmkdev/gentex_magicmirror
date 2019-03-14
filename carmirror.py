@@ -108,10 +108,10 @@ class Carmirror(object):
     def drawfluent(self, pritext, titletext, size=_FLUENT_MED, position=(0,0)):
         if size == self._FLUENT_SMALL:
             self.drawtext(self.tiny_font, titletext, position, self._GREY)
-            self.drawtext(self.sub_font, pritext, (position[0], position[1]+30), self._WHITE)
+            self.drawtext(self.sub_font, pritext, (position[0], position[1]+34), self._WHITE)
         if size == self._FLUENT_MED:
             self.drawtext(self.sub_font, titletext, position, self._GREY)
-            self.drawtext(self.ui_font, pritext, (position[0], position[1]+30), self._WHITE)
+            self.drawtext(self.ui_font, pritext, (position[0], position[1]+34), self._WHITE)
         if size == self._FLUENT_LARGE:
             self.drawtext(self.sub_font, titletext, position, self._GREY)
             self.drawtext(self.huge_font, pritext, position, self._WHITE)
@@ -281,7 +281,7 @@ class Carmirror(object):
             kpi = {'obdcommand': command, 'title': title, 'fontsize': self._FLUENT_MED, 'location':(180,160), 'alt_u': alt_u, 'titleunits': titleunits}
             raw = self.draw_obd_kpi(**kpi)
 
-            ratio = raw.value.magnitude / max
+            ratio = (raw.value.magnitude - min) / (max - min)
 
             start = pi*1.5 - ((2*pi) * ratio)
             end = pi*1.5
