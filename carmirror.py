@@ -25,9 +25,10 @@ class Carmirror(object):
     _FLUENT_MED = 1
     _FLUENT_LARGE = 2
 
-    def __init__(self, gps=None, obd_port=None ):
+    def __init__(self, gps=None, obd_port=None, altunit=False ):
         self.gps = gps
         self.obd_port = obd_port
+        self.altunit = altunit
 
         self.connection = None
         self.gpsconnected = False
@@ -82,13 +83,12 @@ class Carmirror(object):
             self.connection.stop()
             self.connection.unwatch_all()
 
-        for command in obdcommandlist:
-            self.connection.watch(command)
+            for command in obdcommandlist:
+                self.connection.watch(command)
 
         self.currentcommandlist = listname
 
         self.connection.start()
-
 
     def configobd(self):
         try:
@@ -125,7 +125,7 @@ class Carmirror(object):
 
     def formatresponse(self, r, precision=0, alt_u= None):
         try:
-            if altunit and alt_u:
+            if self.altunit and alt_u:
                 r = r.value.to(alt_u)
                 value = r.magnitude
             else:
@@ -140,7 +140,7 @@ class Carmirror(object):
 
     def formattitle(self, r, text, alt_u=None):
         try:
-            if altunit and alt_u:
+            if self.altunit and alt_u:
                 r = r.value.to(alt_u)
                 unit_shorthand = "{:~}".format(r.units)
             else:
@@ -213,7 +213,7 @@ class Carmirror(object):
         ]
 
         obdcommandlist = [x['obdcommand'] for x in kpilist]
-        setobdcommands(obdcommandlist, 'main')
+        self.setobdcommands(obdcommandlist, 'main')
 
         try:
             self.clearscreen()
@@ -251,7 +251,7 @@ class Carmirror(object):
         ]
 
         obdcommandlist = [x['obdcommand'] for x in kpilist]
-        setobdcommands(obdcommandlist, 'airfuel')
+        self.setobdcommands(obdcommandlist, 'airfuel')
 
         try:
             self.clearscreen()
@@ -270,7 +270,7 @@ class Carmirror(object):
 
     def obd_gauge(self, command, title, alt_u=None, titleunits=False, min=0, max=200, warn=135):
         cmdlist = [command]
-        setobdcommands(cmdlist, command.name)
+        self.setobdcommands(cmdlist, command.name)
 
         try:
             self.clearscreen()
@@ -308,7 +308,7 @@ class Carmirror(object):
 
                 if packet.mode >= 2:
                     r = (packet.hspeed * (ureg.meter / ureg.second)).to(ureg.kph)
-                    if altunit:
+                    if self.altunit:
                         r=r.to('mph')
                     title = "speed {:~}".format(r.units)
                     self.drawfluent(int(r.magnitude), title.lower(), self._FLUENT_LARGE, (260,160) )
@@ -317,7 +317,7 @@ class Carmirror(object):
                     self.drawfluent(r.strftime('%a, %b %d %Y %-H:%M:%S'), "time", self._FLUENT_SMALL, (10,10) )
 
                     r = packet.alt * ureg.meter
-                    if altunit:
+                    if self.altunit:
                         r=r.to('ft')
                     title = "altitude {:~}".format(r.units)
 
@@ -347,9 +347,9 @@ class Carmirror(object):
             pygame.display.update()
 
     def accelerometer(self):
-        ax = (random.random() - 0.5) * 2
-        ay = (random.random() - 0.5) * 2
-        az = (random.random() - 0.5) * 2
+        ax = (random.gauss(0.6, 0.2) - 0.5) * 2
+        ay = (random.gauss(0.6, 0.2) - 0.5) * 2
+        az = (random.gauss(0.6, 0.2) - 0.5) * 2
 
         self.clearscreen()
 
@@ -365,15 +365,19 @@ class Carmirror(object):
         dx = int((ax / 1.25) * 210)
 
         if ay >= 0:
-            meatball_color = ( 0, abs(int((ay / 1.25) * 255)), 0)
+            meatball_color = ( 0, min( abs(int((ay / 1.25) * 255)), 255) , 0)
         else:
-            meatball_color = ( abs(int((ay / 1.25) * 255)), 0, 0)
+            meatball_color = ( min( abs(int((ay / 1.25) * 255)), 255), 0, 0)
 
-        pygame.draw.circle(self.screen, self._WHITE, (320+dx,240-dy), 15)
-        pygame.draw.circle(self.screen, meatball_color, (320+dx,240-dy), 12)
+        try:
+            pygame.draw.circle(self.screen, self._WHITE, (320+dx,240-dy), 15)
+            pygame.draw.circle(self.screen, meatball_color, (320+dx,240-dy), 12)
+        except:
+            logging.exception(meatball_color)
 
-        self.drawfluent('{:0.2f}'.format(ax), 'ax g', self._FLUENT_SMALL, (10,10) )
-        self.drawfluent('{:0.2f}'.format(ay), 'ay g', self._FLUENT_SMALL, (10,380) )
+
+        self.drawfluent('{:0.2f}'.format(ay), 'accel g', self._FLUENT_SMALL, (10,10) )
+        self.drawfluent('{:0.2f}'.format(ax), 'lat g', self._FLUENT_SMALL, (10,380) )
 
         pygame.display.update()
 

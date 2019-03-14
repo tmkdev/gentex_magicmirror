@@ -46,7 +46,7 @@ if __name__ == '__main__':
         backup.when_released = servo.min
 
 
-    mirror = Carmirror(gps=True, obd_port = obd_port)
+    mirror = Carmirror(gps=True, obd_port = obd_port, altunit=altunit)
     mirror.infoscreen("starting OBD", "Please wait")
     mirror.configobd()
 
@@ -67,8 +67,8 @@ if __name__ == '__main__':
             mirror.accelerometer()
         for x in range(600):
             mirror.gpsscreen()
-        if connection:
-            logging.warning(connection.status())
+        if True:
+            logging.warning(mirror.connection.status())
             for x in range(600):
                 mirror.obd_main()
             for x in range(600):
