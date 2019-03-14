@@ -11,8 +11,9 @@ from collections import namedtuple
 from pathlib import Path
 import ast
 from math import pi
+import _thread
 
-from gpiozero import LED
+from gpiozero import LED, Button, Servo
 import pint
 
 #obd.logger.setLevel(obd.logging.DEBUG)
@@ -44,7 +45,7 @@ def setobdcommands(obdcommandlist, listname):
 
         connection.start()
 
-def configobd(port='/dev/pts/3'):
+def configobd(port='/dev/pts/2'):
     try:
         global connection
         connection = obd.Async(port)
@@ -361,15 +362,31 @@ class Carmirror(object):
             pygame.display.update()
 
 
+
 if __name__ == '__main__':
     reverse_pin = int(os.getenv('REV_GPIO', 17))
+    servo_gpio = int(os.getenv('SERVO_GPIO', 27))
+    backup_in = int(os.getenv('BACKUP_GPIO', 22))
+
     obd_port = os.getenv('OBD_PORT', '/dev/ttyACM0')
 
     logging.warning('Reverse activate pin {0}'.format(reverse_pin))
     logging.warning('ELM327 OBD Serial port {0}'.format(obd_port))
     logging.warning('Use Alt Units - (Imperial) {0}'.format(altunit))
 
+    #Set screen on pin
     setscreen(reverse_pin)
+
+    #Could not make this work in a function.. Or a thread..
+    if servo_gpio and backup_in:
+        logging.warning('Setting up 2 way video switch on GPIO {0} triggered by {1}.'.format(servo_gpio, backup_in))
+        backup = Button(backup_in)
+
+        init_servo = 1 if backup.value else -1
+        servo = Servo(servo_gpio, initial_value=init_servo)
+
+        backup.when_pressed = servo.max
+        backup.when_released = servo.min
 
     mirror = Carmirror()
     mirror.infoscreen("starting OBD", "Please wait")
@@ -388,14 +405,14 @@ if __name__ == '__main__':
 
 
     while True:
-        for x in range(100):
+        for x in range(600):
             mirror.gpsscreen()
         if connection:
             logging.warning(connection.status())
-            for x in range(200):
+            for x in range(600):
                 mirror.obd_main()
-            for x in range(200):
+            for x in range(600):
                 mirror.obd_airfuel()
         for gauge in gauges:
-            for x in range(200):
+            for x in range(600):
                 mirror.obd_gauge(**gauge)
