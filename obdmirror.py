@@ -11,7 +11,7 @@ from collections import namedtuple
 from pathlib import Path
 import ast
 from math import pi
-import _thread
+import random
 
 from gpiozero import LED, Button, Servo
 import pint
@@ -70,6 +70,7 @@ class Carmirror(object):
     _DARKGREY = (32,32,32)
     _BLACK = (0,0,0)
     _WARNING = (255,51,0)
+    _OK = (51, 255, 0)
 
     _FLUENT_SMALL = 0
     _FLUENT_MED = 1
@@ -362,25 +363,35 @@ class Carmirror(object):
             pygame.display.update()
 
     def accelerometer(self):
-        ax = math.random() * 0.5
-        ay = math.random() * 0.5
-        az = math.random() * 0.5
+        ax = random.random() - 0.5
+        ay = random.random() - 0.5
+        az = random.random() - 0.5
 
         self.clearscreen()
 
         pygame.draw.circle(self.screen, self._WHITE, (320,240), 230)
         pygame.draw.circle(self.screen, self._DARKGREY, (320,240), 210)
+        pygame.draw.circle(self.screen, self._WHITE, (320,240), 5)
 
         dy = int((ay / 1.25) * 230)
         dx = int((ax / 1.25) * 230)
 
-        pygame.draw.circle(self.screen, self._WHITE, (320+dx,240+dy), 10)
-        pygame.draw.circle(self.screen, self._BLACK, (320+dx,240+dy), 6)
 
-        self.drawfluent(ax, 'ax:', self._FLUENT_SMALL, (10,10) )
-        self.drawfluent(ax, 'ay:', self._FLUENT_SMALL, (10,60) )
+        meatball_color = self._DARKGREY
+        if ay < 0.2:
+            meatball_color = self._OK
+        if ay > -0.2:
+            meatball_color = self._WARNING
+
+        pygame.draw.circle(self.screen, self._WHITE, (320+dx,240+dy), 20)
+        pygame.draw.circle(self.screen, meatball_color, (320+dx,240+dy), 14)
+
+        self.drawfluent('{:.2f}'.format(ax), 'ax g', self._FLUENT_SMALL, (10,10) )
+        self.drawfluent('{:.2f}'.format(ay), 'ay g', self._FLUENT_SMALL, (10,380) )
 
         pygame.display.update()
+
+        time.sleep(0.03)
 
 
 if __name__ == '__main__':
