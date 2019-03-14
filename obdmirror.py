@@ -1,65 +1,26 @@
 import os
 import time
-import gpsd
 import logging
 import obd
 from collections import namedtuple
 from pathlib import Path
 import ast
 
-from carmirror import Carmirror
 from gpiozero import LED, Button, Servo
-import pint
+
+from carmirror import Carmirror
 
 #obd.logger.setLevel(obd.logging.DEBUG)
 
-ureg = pint.UnitRegistry()
-
 altunitraw = os.getenv('ALTUNIT', 'False')
 altunit = ast.literal_eval(altunitraw)
-
-connection = None
-gpsconnected = False
-currentcommandlist = None
-
 
 def setscreen(rev_gpio):
     screen_reverse_pin = LED(rev_gpio)
     screen_reverse_pin.blink(on_time=10, off_time=1, background=True)
 
-def setobdcommands(obdcommandlist, listname):
-    global connection, currentcommandlist
-    if currentcommandlist != listname:
-        connection.stop()
-        connection.unwatch_all()
-
-        for command in obdcommandlist:
-            connection.watch(command)
-
-        currentcommandlist = listname
-
-        connection.start()
-
-def configobd(port='/dev/pts/2'):
-    try:
-        global connection
-        connection = obd.Async(port)
-    except:
-        logging.critical('No OBD found on {0}'.format(port))
-
-
-def configgps():
-    global gpsconnected
-    while not gpsconnected:
-        try:
-            gpsd.connect()
-            gpsconnected=True
-        except:
-            logging.critical('No GPS connection present. TIME NOT SET.')
-            time.sleep(0.5)
-
-
 if __name__ == '__main__':
+
     reverse_pin = int(os.getenv('REV_GPIO', 17))
     servo_gpio = int(os.getenv('SERVO_GPIO', 27))
     backup_in = int(os.getenv('BACKUP_GPIO', 22))
@@ -84,13 +45,14 @@ if __name__ == '__main__':
         backup.when_pressed = servo.max
         backup.when_released = servo.min
 
-    mirror = Carmirror()
+
+    mirror = Carmirror(gps=True, obd_port = obd_port)
     mirror.infoscreen("starting OBD", "Please wait")
-    configobd(obd_port)
+    mirror.configobd()
 
     mirror.infoscreen("starting GPS", "Please wait")
-    configgps()
-    if connection:
+    mirror.configgps()
+    if mirror.connection:
         mirror.codes()
 
     gauges = [

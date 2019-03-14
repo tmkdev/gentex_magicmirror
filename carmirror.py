@@ -1,11 +1,17 @@
 import logging
 import random
+import os
+import gpsd
+import obd
+import time
+from math import pi
 
 import pygame
 import pygame.freetype
-from math import pi
 
+import pint
 
+ureg = pint.UnitRegistry()
 
 class Carmirror(object):
     screen = None
@@ -19,7 +25,14 @@ class Carmirror(object):
     _FLUENT_MED = 1
     _FLUENT_LARGE = 2
 
-    def __init__(self):
+    def __init__(self, gps=None, obd_port=None ):
+        self.gps = gps
+        self.obd_port = obd_port
+
+        self.connection = None
+        self.gpsconnected = False
+        self.currentcommandlist = None
+
         "Ininitializes a new pygame screen using the framebuffer"
         # Based on "Python GUI in Linux frame buffer"
         # http://www.karoltomala.com/blog/?p=679
@@ -63,6 +76,34 @@ class Carmirror(object):
 
     def __del__(self):
         "Destructor to make sure pygame shuts down, etc."
+
+    def setobdcommands(self, obdcommandlist, listname):
+        if self.currentcommandlist != listname:
+            self.connection.stop()
+            self.connection.unwatch_all()
+
+        for command in obdcommandlist:
+            self.connection.watch(command)
+
+        self.currentcommandlist = listname
+
+        self.connection.start()
+
+
+    def configobd(self):
+        try:
+            self.connection = obd.Async(self.obd_port)
+        except:
+            logging.critical('No OBD found on {0}'.format(self.obd_port))
+
+    def configgps(self):
+        while not self.gpsconnected:
+            try:
+                gpsd.connect()
+                self.gpsconnected=True
+            except:
+                logging.critical('No GPS connection present. TIME NOT SET.')
+                time.sleep(0.5)
 
     def drawfluent(self, pritext, titletext, size=_FLUENT_MED, position=(0,0)):
         if size == self._FLUENT_SMALL:
@@ -138,9 +179,9 @@ class Carmirror(object):
     def codes(self):
         self.infoscreen("checking DTCs", "please wait")
 
-        setobdcommands([ obd.commands.GET_DTC ], 'dtc')
+        self.setobdcommands([ obd.commands.GET_DTC ], 'dtc')
         time.sleep(2)
-        r = connection.query(obd.commands.GET_DTC)
+        r = self.connection.query(obd.commands.GET_DTC)
 
         if r.value:
             msg = "DTC Count {0}".format(len(r.value))
@@ -148,7 +189,7 @@ class Carmirror(object):
             time.sleep(3)
 
     def draw_obd_kpi(self, obdcommand, title, location,  fontsize=_FLUENT_SMALL, alt_u=None, precision=0, titleunits=False):
-        raw = connection.query(obdcommand)
+        raw = self.connection.query(obdcommand)
         r = self.formatresponse(raw, precision, alt_u)
         if titleunits:
             title = self.formattitle(raw, title, alt_u)
@@ -306,22 +347,34 @@ class Carmirror(object):
             pygame.display.update()
 
     def accelerometer(self):
-        ax = math.random() * 0.5
-        ay = math.random() * 0.5
-        az = math.random() * 0.5
+        ax = (random.random() - 0.5) * 2
+        ay = (random.random() - 0.5) * 2
+        az = (random.random() - 0.5) * 2
 
         self.clearscreen()
 
         pygame.draw.circle(self.screen, self._WHITE, (320,240), 230)
         pygame.draw.circle(self.screen, self._DARKGREY, (320,240), 210)
 
-        dy = int((ay / 1.25) * 230)
-        dx = int((ax / 1.25) * 230)
+        pygame.draw.circle(self.screen, self._WHITE, (320,240), 169)
+        pygame.draw.circle(self.screen, self._DARKGREY, (320,240), 167)
 
-        pygame.draw.circle(self.screen, self._WHITE, (320+dx,240+dy), 10)
-        pygame.draw.circle(self.screen, self._BLACK, (320+dx,240+dy), 6)
+        pygame.draw.circle(self.screen, self._WHITE, (320,240), 7)
 
-        self.drawfluent(ax, 'ax:', self._FLUENT_SMALL, (10,10) )
-        self.drawfluent(ax, 'ay:', self._FLUENT_SMALL, (10,60) )
+        dy = int((ay / 1.25) * 210)
+        dx = int((ax / 1.25) * 210)
+
+        if ay >= 0:
+            meatball_color = ( 0, abs(int((ay / 1.25) * 255)), 0)
+        else:
+            meatball_color = ( abs(int((ay / 1.25) * 255)), 0, 0)
+
+        pygame.draw.circle(self.screen, self._WHITE, (320+dx,240-dy), 15)
+        pygame.draw.circle(self.screen, meatball_color, (320+dx,240-dy), 12)
+
+        self.drawfluent('{:0.2f}'.format(ax), 'ax g', self._FLUENT_SMALL, (10,10) )
+        self.drawfluent('{:0.2f}'.format(ay), 'ay g', self._FLUENT_SMALL, (10,380) )
 
         pygame.display.update()
+
+        time.sleep(0.06)
