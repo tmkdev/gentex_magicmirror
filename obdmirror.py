@@ -377,6 +377,9 @@ class Carmirror(object):
         pygame.draw.circle(self.screen, self._WHITE, (320+dx,240+dy), 10)
         pygame.draw.circle(self.screen, self._BLACK, (320+dx,240+dy), 6)
 
+        self.drawfluent(ax, 'ax:', self._FLUENT_SMALL, (10,10) )
+        self.drawfluent(ax, 'ay:', self._FLUENT_SMALL, (10,60) )
+
         pygame.display.update()
 
 
