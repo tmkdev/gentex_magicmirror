@@ -17,6 +17,8 @@ Mating connector: TE Connectivity / AMP 917981-2 - Mouser carries them for $3.28
 
 Pins for connector shell (Order extres - they are fragile) - TE Connectivity / AMP 175265-1 - Mouser has them too. $0.27 each. 
 
+2 way video swich for backup camera: https://www.ebay.com/itm/FPV-Multi-camera-Mini-Two-way-Electronic-Switch-Video-Switcher-Module-for-RC-Dro/173818046132?epid=1463144405&hash=item28785ce6b4:g:5NAAAOSw-K1cefKV 
+
 Example of the thing runing: https://photos.app.goo.gl/M7oZyTBy9QhEEuzM9 
 
 ![Alt text](assets/screenshots/gps_screen.jpg?raw=true "GPS Screenshot")
