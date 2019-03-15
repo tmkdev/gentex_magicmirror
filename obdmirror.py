@@ -12,9 +12,9 @@ from carmirror import Carmirror
 from arduino import Arduino
 
 #obd.logger.setLevel(obd.logging.DEBUG)
-
 altunitraw = os.getenv('ALTUNIT', 'False')
 altunit = ast.literal_eval(altunitraw)
+
 
 def setscreen(rev_gpio):
     screen_reverse_pin = LED(rev_gpio)
@@ -82,6 +82,8 @@ if __name__ == '__main__':
                 currentscreen += 1
             elif int(buttons) == 2:
                 currentscreen -= 1
+            #elif int(buttons) == 3:
+            #    altunit = not altunit
         elif not buttons:
             buttonpressed = False
 

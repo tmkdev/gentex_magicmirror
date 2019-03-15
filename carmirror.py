@@ -19,7 +19,7 @@ class Carmirror(object):
     _GREY = (128,128,128)
     _DARKGREY = (32,32,32)
     _BLACK = (0,0,0)
-    _WARNING = (255,51,0)
+    _WARNING = (255,35,0)
 
     _FLUENT_SMALL = 0
     _FLUENT_MED = 1
@@ -68,8 +68,8 @@ class Carmirror(object):
         # Initialise font support
         pygame.font.init()
         self.huge_font = pygame.font.Font("assets/selawkl.ttf", 240)
-        self.ui_font = pygame.font.Font("assets/selawkl.ttf", 90)
-        self.sub_font = pygame.font.Font("assets/selawkl.ttf", 48)
+        self.ui_font = pygame.font.Font("assets/selawkl.ttf", 84)
+        self.sub_font = pygame.font.Font("assets/selawkl.ttf", 44)
         self.tiny_font = pygame.font.Font("assets/selawkl.ttf", 36)
         # Render the screen
         pygame.mouse.set_visible(False)
@@ -353,10 +353,10 @@ class Carmirror(object):
 
         self.clearscreen()
 
-        pygame.draw.circle(self.screen, self._WHITE, (320,240), 230)
+        pygame.draw.circle(self.screen, self._GREY, (320,240), 230)
         pygame.draw.circle(self.screen, self._DARKGREY, (320,240), 210)
 
-        pygame.draw.circle(self.screen, self._WHITE, (320,240), 169)
+        pygame.draw.circle(self.screen, self._GREY, (320,240), 169)
         pygame.draw.circle(self.screen, self._DARKGREY, (320,240), 167)
 
         pygame.draw.circle(self.screen, self._WHITE, (320,240), 7)
