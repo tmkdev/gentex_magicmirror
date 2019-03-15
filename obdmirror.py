@@ -82,8 +82,8 @@ if __name__ == '__main__':
                 currentscreen += 1
             elif int(buttons) == 2:
                 currentscreen -= 1
-            #elif int(buttons) == 3:
-            #    altunit = not altunit
+            elif int(buttons) == 3: # Set fav for now.. 
+                currentscreen = 4
         elif not buttons:
             buttonpressed = False
 
