@@ -5,6 +5,7 @@ import obd
 from collections import namedtuple
 from pathlib import Path
 import ast
+import math
 
 from gpiozero import LED, Button, Servo
 
@@ -90,7 +91,10 @@ if __name__ == '__main__':
         currentscreen = currentscreen % 10
 
         if currentscreen == 0:
-            mirror.accelerometer()
+            ax = (random.gauss(0.6, 0.2) - 0.5) * 2
+            ay = (random.gauss(0.6, 0.2) - 0.5) * 2
+            mirror.accelerometer(ax, ay, 0, 0)
+
         if currentscreen == 1:
             mirror.gpsscreen()
         if currentscreen == 2:
