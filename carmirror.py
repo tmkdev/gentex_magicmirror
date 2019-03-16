@@ -349,6 +349,7 @@ class Carmirror(object):
     def accelerometer(self, ax, ay, maxax, maxay):
 
         at = hypot(ax, ay)
+        mat = hypot(maxax, maxay)
 
         self.clearscreen()
 
@@ -378,6 +379,7 @@ class Carmirror(object):
         self.drawfluent('{:0.2f}'.format(ay), 'accel g', self._FLUENT_SMALL, (10,10) )
         self.drawfluent('{:0.2f}'.format(ax), 'lat g', self._FLUENT_SMALL, (10,380) )
         self.drawfluent('{:0.2f}'.format(at), 'tot g', self._FLUENT_SMALL, (540,10) )
+        self.drawfluent('{:0.2f}'.format(mat), 'max g', self._FLUENT_SMALL, (540,380) )
 
         pygame.display.update()
 
