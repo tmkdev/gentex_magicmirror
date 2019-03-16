@@ -4,7 +4,7 @@ import os
 import gpsd
 import obd
 import time
-from math import pi
+from math import pi, hypot
 
 import pygame
 import pygame.freetype
@@ -351,6 +351,8 @@ class Carmirror(object):
         ay = (random.gauss(0.6, 0.2) - 0.5) * 2
         az = (random.gauss(0.6, 0.2) - 0.5) * 2
 
+        at = hypot(ax, ay)
+
         self.clearscreen()
 
         pygame.draw.circle(self.screen, self._GREY, (320,240), 230)
@@ -365,9 +367,9 @@ class Carmirror(object):
         dx = int((ax / 1.25) * 210)
 
         if ay >= 0:
-            meatball_color = ( 0, min( abs(int((ay / 1.25) * 255)), 255) , 0)
-        else:
             meatball_color = ( min( abs(int((ay / 1.25) * 255)), 255), 0, 0)
+        else:
+            meatball_color = ( 0, min( abs(int((ay / 1.25) * 255)), 255) , 0)
 
         try:
             pygame.draw.circle(self.screen, self._WHITE, (320+dx,240-dy), 15)
@@ -378,6 +380,7 @@ class Carmirror(object):
 
         self.drawfluent('{:0.2f}'.format(ay), 'accel g', self._FLUENT_SMALL, (10,10) )
         self.drawfluent('{:0.2f}'.format(ax), 'lat g', self._FLUENT_SMALL, (10,380) )
+        self.drawfluent('{:0.2f}'.format(at), 'tot g', self._FLUENT_SMALL, (540,10) )
 
         pygame.display.update()
 
