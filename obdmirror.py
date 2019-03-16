@@ -1,39 +1,43 @@
 import os
 import time
 import logging
-import obd
-from collections import namedtuple
-from pathlib import Path
 import ast
+import math
 
+import obd
 from gpiozero import LED, Button, Servo
 
 from carmirror import Carmirror
 from arduino import Arduino
 
 #obd.logger.setLevel(obd.logging.DEBUG)
-altunitraw = os.getenv('ALTUNIT', 'False')
-altunit = ast.literal_eval(altunitraw)
-
 
 def setscreen(rev_gpio):
     screen_reverse_pin = LED(rev_gpio)
     screen_reverse_pin.blink(on_time=10, off_time=1, background=True)
 
+
+
 if __name__ == '__main__':
+    altunitraw = os.getenv('ALTUNIT', 'False')
+    altunit = ast.literal_eval(altunitraw)
 
     reverse_pin = int(os.getenv('REV_GPIO', 17))
     servo_gpio = int(os.getenv('SERVO_GPIO', 27))
     backup_in = int(os.getenv('BACKUP_GPIO', 22))
 
-    obd_port = os.getenv('OBD_PORT', '/dev/ttyACM0')
+    obd_port = os.getenv('OBD_PORT', '/dev/elm_obd')
+    arduino_port = os.getenv('ARDUINO_PORT', '/dev/arduino')
 
     logging.warning('Reverse activate pin {0}'.format(reverse_pin))
+    logging.warning('Video Switch Servio pin {0}'.format(servo_gpio))
+    logging.warning('Backup activate pin {0}'.format(backup_in))
     logging.warning('ELM327 OBD Serial port {0}'.format(obd_port))
+    logging.warning('ArduinoD Serial port {0}'.format(arduino_port))
     logging.warning('Use Alt Units - (Imperial) {0}'.format(altunit))
 
 
-    arduino = Arduino('/dev/arduino')
+    arduino = Arduino(arduino_port)
     arduino.start()
 
     #Set screen on pin
@@ -90,7 +94,10 @@ if __name__ == '__main__':
         currentscreen = currentscreen % 10
 
         if currentscreen == 0:
-            mirror.accelerometer()
+            ax = (random.gauss(0.6, 0.2) - 0.5) * 2
+            ay = (random.gauss(0.6, 0.2) - 0.5) * 2
+            mirror.accelerometer(ax, ay, 0, 0)
+
         if currentscreen == 1:
             mirror.gpsscreen()
         if currentscreen == 2:

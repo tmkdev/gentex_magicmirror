@@ -346,10 +346,7 @@ class Carmirror(object):
 
             pygame.display.update()
 
-    def accelerometer(self):
-        ax = (random.gauss(0.6, 0.2) - 0.5) * 2
-        ay = (random.gauss(0.6, 0.2) - 0.5) * 2
-        az = (random.gauss(0.6, 0.2) - 0.5) * 2
+    def accelerometer(self, ax, ay, maxax, maxay):
 
         at = hypot(ax, ay)
 
