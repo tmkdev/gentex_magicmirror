@@ -19,6 +19,8 @@ Pins for connector shell (Order extres - they are fragile) - TE Connectivity / A
 
 2 way video swich for backup camera: https://www.ebay.com/itm/FPV-Multi-camera-Mini-Two-way-Electronic-Switch-Video-Switcher-Module-for-RC-Dro/173818046132?epid=1463144405&hash=item28785ce6b4:g:5NAAAOSw-K1cefKV 
 
+Use GPSD and chony for time sync.. https://photobyte.org/raspberry-pi-stretch-gps-dongle-as-a-time-source-with-chrony-timedatectl/ 
+
 Example of the thing runing: https://photos.app.goo.gl/M7oZyTBy9QhEEuzM9 
 
 ![Alt text](assets/screenshots/gps_screen.jpg?raw=true "GPS Screenshot")
