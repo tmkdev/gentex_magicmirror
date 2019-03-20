@@ -94,9 +94,11 @@ if __name__ == '__main__':
         currentscreen = currentscreen % 10
 
         if currentscreen == 0:
-            ax = (random.gauss(0.6, 0.2) - 0.5) * 2
-            ay = (random.gauss(0.6, 0.2) - 0.5) * 2
-            mirror.accelerometer(ax, ay, 0, 0)
+            ax = arduino.get_value('AX')
+            ay = arduino.get_value('AY')
+            maxx = arduino.get_value('MAX')
+            maxy = arduino.get_value('MAY')
+            mirror.accelerometer(ax, ay, maxx, maxy)
 
         if currentscreen == 1:
             mirror.gpsscreen()
