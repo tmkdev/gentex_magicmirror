@@ -5,12 +5,12 @@ import re
 import time
 
 class Arduino(threading.Thread):
-    _keys = ['BTNS', 'AX', 'AY', 'AZ']
+    _keys = ['BTNS', 'AX', 'AY', 'AZ', 'CALX', 'CALY', 'CALZ']
 
     def __init__(self, port):
         threading.Thread.__init__(self)
         self.port = port
-        self.data = {}
+        self.data = {'MAX': 0, 'MAY', 0, 'MAZ': 0}
 
         self.ser = serial.Serial(self.port, 115200, timeout=0.5)
 
@@ -41,6 +41,16 @@ class Arduino(threading.Thread):
 
                 except:
                     logging.exception('Something wrong in arduino serial data class')
+
+    def checkmax(key, value):
+        if re.match(key, 'A[XYZ]'):
+            maxkey = 'M' + key
+
+            if abs(value) > self.data[maxkey]:
+                lock = threading.Lock()
+                lock.acquire()
+                self.data[maxkey] = value
+                lock.release()                
 
     def get_value(self, key):
         try:
