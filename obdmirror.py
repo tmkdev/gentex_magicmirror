@@ -3,7 +3,6 @@ import time
 import logging
 import ast
 import math
-import random
 
 import obd
 from gpiozero import LED, Button, Servo
