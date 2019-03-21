@@ -10,14 +10,11 @@ led = digitalio.DigitalInOut(board.D13)
 led.direction = digitalio.Direction.OUTPUT
 
 led.value = False
+brightness=32
 
 pin = analogio.AnalogIn(board.A3)
-
-brightness=16
-
 pixels = adafruit_dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1)
-
-i2c = busio.I2C(board.SCL, board.SDA)
+i2c = busio.I2C(board.SCL, board.SDA, frequency=100000)
 accelerometer = adafruit_adxl34x.ADXL345(i2c)
 
 xa = []
@@ -29,7 +26,7 @@ for x in range(10):
     xa.append(x)
     ya.append(y)
     za.append(z)
-    time.sleep(0.05)
+    time.sleep(0.1)
 
 calx = -(sum(xa) / 10.0)
 caly = -(sum(ya) / 10.0)
@@ -66,4 +63,4 @@ while True:
         print("BTNS:3")
         pixels[0] = (brightness, 0, 0)
 
-    time.sleep(0.05)
+    time.sleep(0.025)
