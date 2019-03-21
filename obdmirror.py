@@ -10,6 +10,8 @@ from gpiozero import LED, Button, Servo
 from carmirror import Carmirror
 from arduino import Arduino
 
+from threading import Lock
+
 #obd.logger.setLevel(obd.logging.DEBUG)
 
 def setscreen(rev_gpio):
@@ -39,6 +41,8 @@ if __name__ == '__main__':
 
     arduino = Arduino(arduino_port)
     arduino.start()
+
+    lock = Lock()
 
     #Set screen on pin
     setscreen(reverse_pin)
@@ -86,7 +90,7 @@ if __name__ == '__main__':
                 currentscreen += 1
             elif int(buttons) == 2:
                 currentscreen -= 1
-            elif int(buttons) == 3: # Set fav for now.. 
+            elif int(buttons) == 3: # Set fav for now..
                 currentscreen = 4
         elif not buttons:
             buttonpressed = False
@@ -94,10 +98,12 @@ if __name__ == '__main__':
         currentscreen = currentscreen % 10
 
         if currentscreen == 0:
-            ax = arduino.get_value('AX')
-            ay = arduino.get_value('AY')
-            maxx = arduino.get_value('MAX')
-            maxy = arduino.get_value('MAY')
+            lock.acquire()
+            ax = arduino.get_value('AY') / 9.81
+            ay = arduino.get_value('AX') / 9.81
+            maxx = arduino.get_value('MAY') / 9.81
+            maxy = arduino.get_value('MAX') / 9.81
+            lock.release()
             mirror.accelerometer(ax, ay, maxx, maxy)
 
         if currentscreen == 1:

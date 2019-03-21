@@ -10,60 +10,65 @@ class Arduino(threading.Thread):
     def __init__(self, port):
         threading.Thread.__init__(self)
         self.port = port
-        self.data = {'MAX': 0, 'MAY', 0, 'MAZ': 0}
+        self.data = {'MAX': 0, 'MAY': 0, 'MAZ': 0}
 
-        self.ser = serial.Serial(self.port, 115200, timeout=0.5)
+        self.ser = serial.Serial(self.port, 115200, timeout=0)
 
         self.daemon = True
 
     def run(self):
-        linematch=re.compile('([A-Za-z]+):([0-9.])+')
+        linematch=re.compile('([A-Za-z]+):([0-9.\-]+)')
 
-        lock = threading.Lock()
+        linearray = []
+        line=None
 
-        while True:
-            with self.ser as s:
-                try:
-                    line=self.ser.readline()
-                    if line:
-                        linestring = line.decode('ascii')
+        with self.ser as s:
+            while True:
+                line=None
+                for c in s.read():
+                    linearray.append(c)
+                    if c == 13:
+                        line = ''.join([chr(x) for x in linearray])
+                        linearray=[]
+                        break
 
-                        parsed  = linematch.match(linestring)
+                if line:
+                    parsed  = linematch.search(line)
 
-                        if parsed:
-                            entity = parsed.group(1)
-                            value = float(parsed.group(2))
-                            if entity in self._keys:
-                                lock.acquire()
-                                self.data[entity] = value
-                                lock.release()
-                                logging.info(self.data)
+                    if parsed:
+                        entity = parsed.group(1)
+                        value = float(parsed.group(2))
+                        if entity in self._keys:
+                            self.data[entity] = value
+                            self.checkmax(entity, value)
+                            logging.info(self.data)
 
-                except:
-                    logging.exception('Something wrong in arduino serial data class')
 
-    def checkmax(key, value):
-        if re.match(key, 'A[XYZ]'):
+    def checkmax(self, key, value):
+        if re.match('A[XYZ]', key):
             maxkey = 'M' + key
-
             if abs(value) > self.data[maxkey]:
-                lock = threading.Lock()
-                lock.acquire()
-                self.data[maxkey] = value
-                lock.release()                
+                self.data[maxkey] = abs(value)
 
     def get_value(self, key):
         try:
             return self.data[key]
         except KeyError:
             logging.warning('Arduino data - missing key - {0}'.format(key))
-            return None
+            return 0
 
 if __name__ == '__main__':
     t = Arduino('/dev/arduino')
     t.start()
 
-    t.get_value('test')
+    try:
+        while True:
+            print(t.get_value('AZ'))
+            print(t.get_value('MAZ'))
+
+
+    except KeyboardInterrupt:
+        logging.warning('Done..')
 
     t.join()
 

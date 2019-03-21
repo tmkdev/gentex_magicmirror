@@ -348,8 +348,14 @@ class Carmirror(object):
 
     def accelerometer(self, ax, ay, maxax, maxay):
 
-        at = hypot(ax, ay)
-        mat = hypot(maxax, maxay)
+        try:
+            at = hypot(ax, ay)
+        except:
+            at=0
+        try:
+            mat = hypot(maxax, maxay)
+        except:
+            mat=0
 
         self.clearscreen()
 
