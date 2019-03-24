@@ -359,11 +359,11 @@ class Carmirror(object):
 
         self.clearscreen()
 
-        pygame.draw.circle(self.screen, self._GREY, (320,240), 230)
-        pygame.draw.circle(self.screen, self._DARKGREY, (320,240), 210)
+        pygame.draw.circle(self.screen, self._WHITE, (320,240), 230)
+        pygame.draw.circle(self.screen, self._BLACK, (320,240), 210)
 
         pygame.draw.circle(self.screen, self._GREY, (320,240), 169)
-        pygame.draw.circle(self.screen, self._DARKGREY, (320,240), 167)
+        pygame.draw.circle(self.screen, self._BLACK, (320,240), 167)
 
         pygame.draw.circle(self.screen, self._WHITE, (320,240), 7)
 
