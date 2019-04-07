@@ -11,4 +11,4 @@ Step 2 - Find power. I could have used the 5V/GND pins from the USB header. I on
 ![Alt text](assets/elm_modifications/3_3V_source_for_relay.jpg?raw=true "3.3V power for coil.")
 
 Step 3 - complete the wiring. Hot glue everything in. (Or whatever.)
-![Alt text](assets/elm_modifications/relay_installed.jog?raw=true "Relay Installed")
+![Alt text](assets/elm_modifications/relay_installed.jpg?raw=true "Relay Installed")
