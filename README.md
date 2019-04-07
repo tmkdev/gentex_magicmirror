@@ -1,12 +1,15 @@
 # gentex_magicmirror
-Raspberry Pi to Gentex 657 rear view (LCD) magic mirror 
-
+## Raspberry Pi to Gentex 657 rear view (LCD) magic mirror 
+---
+### Sources:
 Open font source:
 https://github.com/winjs/winstrap/tree/5a3c1341190e7585fd550e01cfded50ae4e8a4c7/src/fonts 
 
 pygame code based on:
 https://learn.adafruit.com/pi-video-output-using-pygame/pointing-pygame-to-the-framebuffer 
 
+---
+### Gentex Mirror Hardware
 
 Notes on the Gentex 657 mirror.
 Driving reverse lamp pin (9) with a duty cycle of 10s on, 1s off keeps it from timing out. It works as low as 3.3V, driven from a raspberry pi GPIO. 
@@ -17,10 +20,12 @@ Mating connector: TE Connectivity / AMP 917981-2 - Mouser carries them for $3.28
 
 Pins for connector shell (Order extres - they are fragile) - TE Connectivity / AMP 175265-1 - Mouser has them too. $0.27 each. 
 
-2 way video swich for backup camera: https://www.ebay.com/itm/FPV-Multi-camera-Mini-Two-way-Electronic-Switch-Video-Switcher-Module-for-RC-Dro/173818046132?epid=1463144405&hash=item28785ce6b4:g:5NAAAOSw-K1cefKV 
-
+---
+### Setup Notes:
 Use GPSD and chony for time sync.. https://photobyte.org/raspberry-pi-stretch-gps-dongle-as-a-time-source-with-chrony-timedatectl/ 
 
+---
+### Demos
 Example of the thing runing: https://photos.app.goo.gl/M7oZyTBy9QhEEuzM9 
 
 ![Alt text](assets/screenshots/gps_screen.jpg?raw=true "GPS Screenshot")
