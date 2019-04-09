@@ -1,10 +1,10 @@
 import time
 import board
 import busio
-import adafruit_adxl34x
 import adafruit_dotstar
 import analogio
 import digitalio
+import adafruit_bno055
 
 led = digitalio.DigitalInOut(board.D13)
 led.direction = digitalio.Direction.OUTPUT
@@ -14,40 +14,19 @@ brightness=32
 
 pin = analogio.AnalogIn(board.A3)
 pixels = adafruit_dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1)
-i2c = busio.I2C(board.SCL, board.SDA, frequency=100000)
-accelerometer = adafruit_adxl34x.ADXL345(i2c)
 
-xa = []
-ya = []
-za = []
-
-for x in range(10):
-    (x,y,z) = accelerometer.acceleration
-    xa.append(x)
-    ya.append(y)
-    za.append(z)
-    time.sleep(0.1)
-
-calx = -(sum(xa) / 10.0)
-caly = -(sum(ya) / 10.0)
-calz = 9.81 - (sum(za) / 10.0)
+i2c = busio.I2C(board.SCL, board.SDA, frequency=400000)
+sensor = adafruit_bno055.BNO055(i2c, 0x29)
+sensor.mode = adafruit_bno055.NDOF_FMC_OFF_MODE 
 
 led.value = True
 
-print("CALX:{:.2f}".format(calx))
-print("CALY:{:.2f}".format(caly))
-print("CALZ:{:.2f}".format(calz))
-
 while True:
-    (x,y,z) = accelerometer.acceleration
+    (x,y,z) = sensor.linear_acceleration
 
-    x += calx
-    y += caly
-    z += calz
-
-    print("AX:{:.2f}".format(x))
-    print("AY:{:.2f}".format(y))
-    print("AZ:{:.2f}".format(z))
+    print("AX:{:.2f}".format(x/9.81))
+    print("AY:{:.2f}".format(y/9.81))
+    print("AZ:{:.2f}".format(z/9.81))
 
     pinvalue = pin.value
     if pinvalue < 9000:
