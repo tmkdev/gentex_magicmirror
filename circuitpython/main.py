@@ -23,15 +23,14 @@ led.value = True
 
 while True:
     (x,y,z) = sensor.linear_acceleration
-
-    #print('Magnetometer (microteslas): {}'.format(sensor.magnetometer))
-    #print('Gyroscope (deg/sec): {}'.format(sensor.gyroscope))
-    #print('Euler angle: {}'.format(sensor.euler))
-    #print('Quaternion: {}'.format(sensor.quaternion))
+    (ex, ey, ez) = sensor.euler
 
     print("AX:{:.2f}".format(x/9.81))
     print("AY:{:.2f}".format(y/9.81))
     print("AZ:{:.2f}".format(z/9.81))
+    print("EX:{:.2f}".format((ex+90)%360))
+    print("EY:{:.2f}".format(ey))
+    print("EZ:{:.2f}".format(ez))
 
     pinvalue = pin.value
     if pinvalue < 9000:
