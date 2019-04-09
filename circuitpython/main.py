@@ -15,7 +15,7 @@ brightness=32
 pin = analogio.AnalogIn(board.A3)
 pixels = adafruit_dotstar.DotStar(board.APA102_SCK, board.APA102_MOSI, 1)
 
-i2c = busio.I2C(board.SCL, board.SDA, frequency=400000)
+i2c = busio.I2C(board.SCL, board.SDA, frequency=100000)
 sensor = adafruit_bno055.BNO055(i2c, 0x29)
 sensor.mode = adafruit_bno055.NDOF_FMC_OFF_MODE 
 
