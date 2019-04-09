@@ -24,6 +24,11 @@ led.value = True
 while True:
     (x,y,z) = sensor.linear_acceleration
 
+    #print('Magnetometer (microteslas): {}'.format(sensor.magnetometer))
+    #print('Gyroscope (deg/sec): {}'.format(sensor.gyroscope))
+    #print('Euler angle: {}'.format(sensor.euler))
+    #print('Quaternion: {}'.format(sensor.quaternion))
+
     print("AX:{:.2f}".format(x/9.81))
     print("AY:{:.2f}".format(y/9.81))
     print("AZ:{:.2f}".format(z/9.81))
