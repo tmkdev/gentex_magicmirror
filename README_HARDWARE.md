@@ -18,3 +18,17 @@ Complete the wiring. Hot glue everything in. (Or whatever.)
 ## 2 Way Video Switcher
 ---
 2 way video swich for backup camera: https://www.ebay.com/itm/FPV-Multi-camera-Mini-Two-way-Electronic-Switch-Video-Switcher-Module-for-RC-Dro/173818046132?epid=1463144405&hash=item28785ce6b4:g:5NAAAOSw-K1cefKV 
+
+
+## Trinket M0 Gentex Analog Interface and Accelerometer
+---
+[Trinket M0](https://learn.adafruit.com/adafruit-trinket-m0-circuitpython-arduino/overview) from [Adafruit](https://adafruit.com)
+
+GY-BNO055 9 Axis Orientation Sensor
+
+Code in the circuit python folder. 
+
+Need an arduino to read the resistor ladder buttons in the mirror. They actually work fine at 3.3V, and the Leds light dimly. The arduino also emits the linear acceleration and euler angles from a BNO-055. 
+
+### ToDo: 
+- [ ] Schematic
