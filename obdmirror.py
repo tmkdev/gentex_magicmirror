@@ -40,6 +40,7 @@ if __name__ == '__main__':
 
 
     arduino = Arduino(arduino_port)
+    arduino.daemon = True
     arduino.start()
 
     lock = Lock()
