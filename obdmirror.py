@@ -40,7 +40,6 @@ if __name__ == '__main__':
 
 
     arduino = Arduino(arduino_port)
-    arduino.daemon = True
     arduino.start()
 
     lock = Lock()
@@ -79,7 +78,7 @@ if __name__ == '__main__':
             ]
 
 
-    currentscreen = 0
+    currentscreen = 1
     buttonpressed = False
 
     while True:
