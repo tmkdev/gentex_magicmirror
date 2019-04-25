@@ -45,7 +45,8 @@ if __name__ == '__main__':
     lock = Lock()
 
     #Set screen on pin
-    setscreen(reverse_pin)
+    screen_reverse_pin = LED(reverse_pin)
+    screen_reverse_pin.blink(on_time=10, off_time=1, background=True)
 
     #Could not make this work in a function.. Or a thread..
     if servo_gpio and backup_in:
@@ -81,46 +82,54 @@ if __name__ == '__main__':
     currentscreen = 1
     buttonpressed = False
 
-    while True:
-        buttons = arduino.get_value('BTNS')
 
-        if buttons and not buttonpressed:
-            buttonpressed = True
-            if int(buttons) == 1:
-                currentscreen += 1
-            elif int(buttons) == 2:
-                currentscreen -= 1
-            elif int(buttons) == 3: # Set fav for now..
-                currentscreen = 4
-        elif not buttons:
-            buttonpressed = False
+    try:
+        while True:
+            buttons = arduino.get_value('BTNS')
 
-        currentscreen = currentscreen % 10
+            if buttons and not buttonpressed:
+                buttonpressed = True
+                if int(buttons) == 1:
+                    currentscreen += 1
+                elif int(buttons) == 2:
+                    currentscreen -= 1
+                elif int(buttons) == 3: # Set fav for now..
+                    currentscreen = 4
+            elif not buttons:
+                buttonpressed = False
 
-        if currentscreen == 0:
-            lock.acquire()
-            ax = arduino.get_value('AY') / 9.81
-            ay = arduino.get_value('AX') / 9.81
-            maxx = arduino.get_value('MAY') / 9.81
-            maxy = arduino.get_value('MAX') / 9.81
-            lock.release()
-            mirror.accelerometer(ax, ay, maxx, maxy)
+            currentscreen = currentscreen % 10
 
-        if currentscreen == 1:
-            mirror.gpsscreen()
-        if currentscreen == 2:
-            mirror.obd_main()
-        if currentscreen == 3:
-            mirror.obd_airfuel()
-        if currentscreen == 4:
-            mirror.obd_gauge(**gauges[0])
-        if currentscreen == 5:
-            mirror.obd_gauge(**gauges[1])
-        if currentscreen == 6:
-            mirror.obd_gauge(**gauges[2])
-        if currentscreen == 7:
-            mirror.obd_gauge(**gauges[3])
-        if currentscreen == 8:
-            mirror.obd_gauge(**gauges[4])
-        if currentscreen == 9:
-            mirror.obd_gauge(**gauges[5])
+            if currentscreen == 0:
+                lock.acquire()
+                ax = arduino.get_value('AY') / 9.81
+                ay = arduino.get_value('AX') / 9.81
+                maxx = arduino.get_value('MAY') / 9.81
+                maxy = arduino.get_value('MAX') / 9.81
+                lock.release()
+                mirror.accelerometer(ax, ay, maxx, maxy)
+
+            if currentscreen == 1:
+                mirror.gpsscreen()
+            if currentscreen == 2:
+                mirror.obd_main()
+            if currentscreen == 3:
+                mirror.obd_airfuel()
+            if currentscreen == 4:
+                mirror.obd_gauge(**gauges[0])
+            if currentscreen == 5:
+                mirror.obd_gauge(**gauges[1])
+            if currentscreen == 6:
+                mirror.obd_gauge(**gauges[2])
+            if currentscreen == 7:
+                mirror.obd_gauge(**gauges[3])
+            if currentscreen == 8:
+                mirror.obd_gauge(**gauges[4])
+            if currentscreen == 9:
+                mirror.obd_gauge(**gauges[5])
+
+    except KeyboardInterrupt:
+        logging.warning('interrupted!')
+
+    screen_reverse_pin.close()
+

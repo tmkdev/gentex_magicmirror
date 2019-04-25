@@ -223,7 +223,7 @@ class Carmirror(object):
 
 
         except KeyboardInterrupt:
-            pass
+            raise
 
         except:
             self.drawtext(self.ui_font, "OBD Error", (10,10))
@@ -260,7 +260,7 @@ class Carmirror(object):
                 self.draw_obd_kpi(**kpi)
 
         except KeyboardInterrupt:
-            pass
+            raise
 
         except:
             self.drawtext(self.ui_font, "OBD Error", (10,10))
@@ -338,7 +338,7 @@ class Carmirror(object):
                     self.drawtext(self.ui_font, "No GPS", (10,100))
 
             except KeyboardInterrupt:
-                pass
+                raise
 
             except:
                 self.drawtext(self.ui_font, "GPS Error", (10,10))
