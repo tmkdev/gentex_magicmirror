@@ -231,6 +231,20 @@ class Carmirror(object):
 
         pygame.display.update()
 
+        return self.get_pressed_keys()
+
+    def get_pressed_keys(self):
+        pygame.event.pump()
+
+        events = pygame.event.get()
+        for event in events:
+            if event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT:
+                    return "K_LEFT"
+                if event.key == pygame.K_RIGHT:
+                    return "K_RIGHT"
+
+        return None
 
     def obd_airfuel(self):
         kpilist = [
@@ -268,6 +282,8 @@ class Carmirror(object):
 
         pygame.display.update()
 
+        return self.get_pressed_keys()
+
     def obd_gauge(self, command, title, alt_u=None, titleunits=False, min=0, max=200, warn=135):
         cmdlist = [command]
         self.setobdcommands(cmdlist, command.name)
@@ -300,6 +316,8 @@ class Carmirror(object):
             logging.exception('Gauge issue - please check')
 
         pygame.display.update()
+
+        return self.get_pressed_keys()
 
     def gpsscreen(self):
             try:
@@ -346,6 +364,9 @@ class Carmirror(object):
 
             pygame.display.update()
 
+            return self.get_pressed_keys()
+
+
     def accelerometer(self, ax, ay, maxax, maxay):
 
         try:
@@ -390,3 +411,6 @@ class Carmirror(object):
         pygame.display.update()
 
         time.sleep(0.06)
+
+        return self.get_pressed_keys()
+

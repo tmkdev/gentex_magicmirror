@@ -85,6 +85,38 @@ if __name__ == '__main__':
 
     try:
         while True:
+            currentscreen = currentscreen % 10
+
+            keypress = None
+
+            if currentscreen == 0:
+                lock.acquire()
+                ax = arduino.get_value('AY') / 9.81
+                ay = arduino.get_value('AX') / 9.81
+                maxx = arduino.get_value('MAY') / 9.81
+                maxy = arduino.get_value('MAX') / 9.81
+                lock.release()
+                keypress = mirror.accelerometer(ax, ay, maxx, maxy)
+
+            if currentscreen == 1:
+                keypress = mirror.gpsscreen()
+            if currentscreen == 2:
+                keypress = mirror.obd_main()
+            if currentscreen == 3:
+                keypress = mirror.obd_airfuel()
+            if currentscreen == 4:
+                keypress = mirror.obd_gauge(**gauges[0])
+            if currentscreen == 5:
+                keypress = mirror.obd_gauge(**gauges[1])
+            if currentscreen == 6:
+                keypress = mirror.obd_gauge(**gauges[2])
+            if currentscreen == 7:
+                keypress = mirror.obd_gauge(**gauges[3])
+            if currentscreen == 8:
+                keypress = mirror.obd_gauge(**gauges[4])
+            if currentscreen == 9:
+                keypress =mirror.obd_gauge(**gauges[5])
+
             buttons = arduino.get_value('BTNS')
 
             if buttons and not buttonpressed:
@@ -98,35 +130,11 @@ if __name__ == '__main__':
             elif not buttons:
                 buttonpressed = False
 
-            currentscreen = currentscreen % 10
+            if keypress == 'K_LEFT':
+                currentscreen -= 1
+            if keypress == 'K_RIGHT':
+                currentscreen += 1
 
-            if currentscreen == 0:
-                lock.acquire()
-                ax = arduino.get_value('AY') / 9.81
-                ay = arduino.get_value('AX') / 9.81
-                maxx = arduino.get_value('MAY') / 9.81
-                maxy = arduino.get_value('MAX') / 9.81
-                lock.release()
-                mirror.accelerometer(ax, ay, maxx, maxy)
-
-            if currentscreen == 1:
-                mirror.gpsscreen()
-            if currentscreen == 2:
-                mirror.obd_main()
-            if currentscreen == 3:
-                mirror.obd_airfuel()
-            if currentscreen == 4:
-                mirror.obd_gauge(**gauges[0])
-            if currentscreen == 5:
-                mirror.obd_gauge(**gauges[1])
-            if currentscreen == 6:
-                mirror.obd_gauge(**gauges[2])
-            if currentscreen == 7:
-                mirror.obd_gauge(**gauges[3])
-            if currentscreen == 8:
-                mirror.obd_gauge(**gauges[4])
-            if currentscreen == 9:
-                mirror.obd_gauge(**gauges[5])
 
     except KeyboardInterrupt:
         logging.warning('interrupted!')
