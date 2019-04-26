@@ -64,7 +64,7 @@ class Carmirror(object):
         logging.warning("Framebuffer size: %d x %d" % (size[0], size[1]))
         self.screen = pygame.display.set_mode(size, pygame.FULLSCREEN)
         # Clear the screen to start
-        self.screen.fill((0, 0, 0))
+        self.screen.fill(self._BLACK)
         # Initialise font support
         pygame.font.init()
         self.huge_font = pygame.font.Font("assets/selawkl.ttf", 240)
@@ -320,55 +320,54 @@ class Carmirror(object):
         return self.get_pressed_keys()
 
     def gpsscreen(self):
-            try:
-                self.clearscreen()
-                packet = gpsd.get_current()
+        try:
+            self.clearscreen()
+            packet = gpsd.get_current()
 
-                if packet.mode >= 2:
-                    r = (packet.hspeed * (ureg.meter / ureg.second)).to(ureg.kph)
-                    if self.altunit:
-                        r=r.to('mph')
-                    title = "speed {:~}".format(r.units)
-                    self.drawfluent(int(r.magnitude), title.lower(), self._FLUENT_LARGE, (260,160) )
+            if packet.mode >= 2:
+                r = (packet.hspeed * (ureg.meter / ureg.second)).to(ureg.kph)
+                if self.altunit:
+                    r=r.to('mph')
+                title = "speed {:~}".format(r.units)
+                self.drawfluent(int(r.magnitude), title.lower(), self._FLUENT_LARGE, (260,160) )
 
-                    r = packet.get_time(local_time=True)
-                    self.drawfluent(r.strftime('%a, %b %d %Y %-H:%M:%S'), "time", self._FLUENT_SMALL, (10,10) )
+                r = packet.get_time(local_time=True)
+                self.drawfluent(r.strftime('%a, %b %d %Y %-H:%M:%S'), "time", self._FLUENT_SMALL, (10,10) )
 
-                    r = packet.alt * ureg.meter
-                    if self.altunit:
-                        r=r.to('ft')
-                    title = "altitude {:~}".format(r.units)
+                r = packet.alt * ureg.meter
+                if self.altunit:
+                    r=r.to('ft')
+                title = "altitude {:~}".format(r.units)
 
-                    self.drawfluent(int(r.magnitude), title.lower(), self._FLUENT_SMALL, (10,90) )
+                self.drawfluent(int(r.magnitude), title.lower(), self._FLUENT_SMALL, (10,90) )
 
-                    r = packet.track
-                    h = self.map_heading(r)
-                    rtext = '{0:.0f} {1}'.format(r, h)
-                    self.drawfluent(rtext, "heading", self._FLUENT_SMALL, (10,170) )
+                r = packet.track
+                h = self.map_heading(r)
+                rtext = '{0:.0f} {1}'.format(r, h)
+                self.drawfluent(rtext, "heading", self._FLUENT_SMALL, (10,170) )
 
-                    r = "{0:.4f}".format(packet.lat)
-                    self.drawfluent(r, "latitude", self._FLUENT_SMALL, (10,250) )
+                r = "{0:.4f}".format(packet.lat)
+                self.drawfluent(r, "latitude", self._FLUENT_SMALL, (10,250) )
 
-                    r = "{0:.4f}".format(packet.lon)
-                    self.drawfluent(r, "longitude", self._FLUENT_SMALL, (10,330) )
+                r = "{0:.4f}".format(packet.lon)
+                self.drawfluent(r, "longitude", self._FLUENT_SMALL, (10,330) )
 
-                else:
-                    self.drawtext(self.ui_font, "No GPS", (10,100))
+            else:
+                self.drawtext(self.ui_font, "No GPS", (10,100))
 
-            except KeyboardInterrupt:
-                raise
+        except KeyboardInterrupt:
+            raise
 
-            except:
-                self.drawtext(self.ui_font, "GPS Error", (10,10))
-                logging.exception('GPS Failure.. ')
+        except:
+            self.drawtext(self.ui_font, "GPS Error", (10,10))
+            logging.exception('GPS Failure.. ')
 
-            pygame.display.update()
+        pygame.display.update()
 
-            return self.get_pressed_keys()
+        return self.get_pressed_keys()
 
 
     def accelerometer(self, ax, ay, maxax, maxay):
-
         try:
             at = hypot(ax, ay)
         except:
