@@ -9,19 +9,11 @@ from gpiozero import LED, Button, Servo
 
 from carmirror import Carmirror
 from arduino import Arduino
+from gauges import *
 
 from threading import Lock
 
 #obd.logger.setLevel(obd.logging.DEBUG)
-
-gauges = [
-            {'command': obd.commands.SPEED, 'title': 'speed', 'max': 200, 'warn': 135, 'alt_u': 'mph', 'titleunits': True},
-            {'command': obd.commands.RPM, 'title': 'rpm', 'max': 6500, 'warn': 5900, 'alt_u': None, 'titleunits': False},
-            {'command': obd.commands.ENGINE_LOAD, 'title': 'load %', 'max': 100, 'warn': 90, 'titleunits': False},
-            {'command': obd.commands.COOLANT_TEMP, 'title': 'coolant temp', 'min': -40, 'max': 215, 'warn': 100, 'alt_u': 'degF', 'titleunits': True},
-            {'command': obd.commands.INTAKE_TEMP, 'title': 'intake temp', 'min': -40, 'max': 215, 'warn': 50, 'alt_u': 'degF', 'titleunits': True},
-            {'command': obd.commands.TIMING_ADVANCE, 'title': 'timing adv deg', 'min': -64, 'max': 64, 'titleunits': False},
-        ]
 
 
 def main():
@@ -76,6 +68,8 @@ def main():
     currentscreen = 1
     buttonpressed = False
 
+    totalscreens = 3 + len(gauges)
+
     try:
         while True:
             currentscreen = currentscreen % 10
@@ -97,19 +91,8 @@ def main():
                 keypress = mirror.obd_main()
             if currentscreen == 3:
                 keypress = mirror.obd_airfuel()
-            if currentscreen == 4:
-                keypress = mirror.obd_gauge(**gauges[0])
-            if currentscreen == 5:
-                keypress = mirror.obd_gauge(**gauges[1])
-            if currentscreen == 6:
-                keypress = mirror.obd_gauge(**gauges[2])
-            if currentscreen == 7:
-                keypress = mirror.obd_gauge(**gauges[3])
-            if currentscreen == 8:
-                keypress = mirror.obd_gauge(**gauges[4])
-            if currentscreen == 9:
-                keypress =mirror.obd_gauge(**gauges[5])
-
+            if currentscreen > 3:
+                keypress = mirror.obd_gauge(**gauges[currentscreen-4])
 
             #handle user inputs. 
             buttons = arduino.get_value('BTNS')
