@@ -68,11 +68,11 @@ def main():
     currentscreen = 1
     buttonpressed = False
 
-    totalscreens = 3 + len(gauges)
+    totalscreens = 4 + len(gauges)
 
     try:
         while True:
-            currentscreen = currentscreen % 10
+            currentscreen = currentscreen % totalscreens
 
             keypress = None
 

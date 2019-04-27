@@ -312,8 +312,6 @@ class Carmirror(object):
 
         except AttributeError:
             pass
-        except:
-            logging.exception('Gauge issue - please check')
 
         pygame.display.update()
 
