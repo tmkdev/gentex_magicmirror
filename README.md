@@ -14,11 +14,13 @@ https://learn.adafruit.com/pi-video-output-using-pygame/pointing-pygame-to-the-f
 Notes on the Gentex 657 mirror.
 Driving reverse lamp pin (9) with a duty cycle of 10s on, 1s off keeps it from timing out. It works as low as 3.3V, driven from a raspberry pi GPIO. 
 
+The other thing to note - the switch resistor stack also works on 3.3V. Too bad the pi has no analog to digital converter to read it directly.
+
 Mirror Pinout: https://ls1tech.com/forums/stereo-electronics/1887542-need-pinout-16-pin-mirror-camera-display.html#&gid=1&pid=1 
 
 Mating connector: TE Connectivity / AMP 917981-2 - Mouser carries them for $3.28 each. 
 
-Pins for connector shell (Order extres - they are fragile) - TE Connectivity / AMP 175265-1 - Mouser has them too. $0.27 each. 
+Pins for connector shell (Order extras - they are fragile) - TE Connectivity / AMP 175265-1 - Mouser has them too. $0.27 each. 
 
 ---
 ### Setup Notes:
