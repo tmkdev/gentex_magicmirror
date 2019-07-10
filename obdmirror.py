@@ -25,18 +25,19 @@ def main():
     backup_in = int(os.getenv('BACKUP_GPIO', 22))
 
     obd_port = os.getenv('OBD_PORT', '/dev/elm_obd')
-    arduino_port = os.getenv('ARDUINO_PORT', '/dev/arduino')
+    arduino_port = os.getenv('ARDUINO_PORT', None)
 
     logging.warning('Reverse activate pin {0}'.format(reverse_pin))
     logging.warning('Video Switch Servio pin {0}'.format(servo_gpio))
     logging.warning('Backup activate pin {0}'.format(backup_in))
     logging.warning('ELM327 OBD Serial port {0}'.format(obd_port))
-    logging.warning('ArduinoD Serial port {0}'.format(arduino_port))
+    logging.warning('Arduino (Physical Interface Unit) Serial port {0}'.format(arduino_port))
     logging.warning('Use Alt Units - (Imperial) {0}'.format(altunit))
 
 
-    arduino = Arduino(arduino_port)
-    arduino.start()
+    if arduino_port:
+        arduino = Arduino(arduino_port)
+        arduino.start()
 
     lock = Lock()
 
@@ -62,6 +63,7 @@ def main():
 
     mirror.infoscreen("starting GPS", "Please wait")
     mirror.configgps()
+    
     if mirror.connection:
         mirror.codes()
 
@@ -77,13 +79,17 @@ def main():
             keypress = None
 
             if currentscreen == 0:
-                lock.acquire()
-                ax = arduino.get_value('AY') / 9.81
-                ay = arduino.get_value('AX') / 9.81
-                maxx = arduino.get_value('MAY') / 9.81
-                maxy = arduino.get_value('MAX') / 9.81
-                lock.release()
-                keypress = mirror.accelerometer(ax, ay, maxx, maxy)
+                if arduino_port:
+                    lock.acquire()
+                    ax = arduino.get_value('AY') / 9.81
+                    ay = arduino.get_value('AX') / 9.81
+                    maxx = arduino.get_value('MAY') / 9.81
+                    maxy = arduino.get_value('MAX') / 9.81
+                    lock.release()
+                    keypress = mirror.accelerometer(ax, ay, maxx, maxy)
+                else:
+                    currentscreen = currentscreen + 1            
+
 
             if currentscreen == 1:
                 keypress = mirror.gpsscreen()
@@ -95,18 +101,19 @@ def main():
                 keypress = mirror.obd_gauge(**gauges[currentscreen-4])
 
             #handle user inputs. 
-            buttons = arduino.get_value('BTNS')
+            if arduino_port:
+                buttons = arduino.get_value('BTNS')
 
-            if buttons and not buttonpressed:
-                buttonpressed = True
-                if int(buttons) == 1:
-                    currentscreen += 1
-                elif int(buttons) == 2:
-                    currentscreen -= 1
-                elif int(buttons) == 3: # Set fav for now..
-                    currentscreen = 4
-            elif not buttons:
-                buttonpressed = False
+                if buttons and not buttonpressed:
+                    buttonpressed = True
+                    if int(buttons) == 1:
+                        currentscreen += 1
+                    elif int(buttons) == 2:
+                        currentscreen -= 1
+                    elif int(buttons) == 3: # Set fav for now..
+                        currentscreen = 4
+                elif not buttons:
+                    buttonpressed = False
 
             if keypress == 'K_LEFT':
                 currentscreen -= 1
